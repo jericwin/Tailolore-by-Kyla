@@ -1,0 +1,23 @@
+{% extends "layouts/account.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Notifications · {{ site.brand_name }}{% endblock %}
+
+{% block content %}
+<header class="acct__head acct__head--row">
+  <div><p class="note">Notifications</p><h1 class="h1">Notices</h1></div>
+  {% if unread %}
+  <form method="post" action="/account/notifications/read">{{ m.csrf() }}<button class="btn btn--ghost btn--small" type="submit">Mark all as read</button></form>
+  {% endif %}
+</header>
+{% if notifications.length %}
+<ul class="notices notices--full" role="list">
+  {% for n in notifications %}
+  <li class="{% if not n.read_at %}is-unread{% endif %}"><a href="/account/notifications/{{ n.id }}">
+    <span><span class="notices__title">{{ n.title }}</span>{% if n.body %}<span class="small muted">{{ n.body }}</span>{% endif %}</span>
+    <span class="note">{{ n.created_at | stamp }}</span>
+  </a></li>
+  {% endfor %}
+</ul>
+{% else %}<p class="muted">Updates about your rentals, purchases and custom gowns will appear here.</p>{% endif %}
+<p class="small muted" style="margin-top: 2rem">Notices appear here and in your account only{% if site.facebook_url %}; for anything urgent, message Kyla on <a href="{{ site.facebook_url }}" rel="noopener" target="_blank">Facebook</a>{% endif %}.</p>
+{% endblock %}

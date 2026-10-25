@@ -1,0 +1,10 @@
+{% extends "layouts/studio.njk" if area == 'studio' and user and isAdmin else "layouts/site.njk" %}
+{% block title %}{{ statusCode }} · {{ site.brand_name }}{% endblock %}
+{% block main %}
+<section class="error-page">
+  <p class="note">Pl. {{ statusCode }}</p>
+  <h1 class="display">{% if statusCode == 404 %}Not found{% elif statusCode == 403 %}Expired{% else %}Sorry{% endif %}</h1>
+  <p class="lede">{{ message }}</p>
+  <a class="link" href="{{ '/studio' if area == 'studio' else '/' }}">Back to the {{ 'studio' if area == 'studio' else 'home page' }} <span class="arrow">→</span></a>
+</section>
+{% endblock %}

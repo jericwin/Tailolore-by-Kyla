@@ -1,0 +1,58 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Settings · Studio{% endblock %}
+
+{% block main %}
+<header class="s-head"><div><p class="note">Studio</p><h1>Settings</h1></div></header>
+<div class="s-body" style="max-width: 60rem">
+  {% if errors | length %}<p class="form-error" role="alert">Please check the highlighted fields.</p>{% endif %}
+  <form method="post" action="/studio/settings" class="s-form boxed">
+    {{ m.csrf() }}
+    <fieldset>
+      <legend>Brand &amp; contact</legend>
+      <p class="small muted">Only filled-in details appear on the website.</p>
+      <div class="row">
+        {{ m.box('brand_name', 'Brand name', values, errors, attrs='maxlength="120"') }}
+        {{ m.box('location', 'Location', values, errors, attrs='maxlength="200"') }}
+      </div>
+      <div class="row">
+        {{ m.box('facebook_url', 'Facebook page', values, errors, type='url', attrs='maxlength="300"') }}
+        {{ m.box('messenger_url', 'Messenger link', values, errors, type='url', hint='e.g. https://m.me/yourpage', attrs='maxlength="300"') }}
+        {{ m.box('instagram_url', 'Instagram', values, errors, type='url', attrs='maxlength="300"') }}
+      </div>
+      <div class="row">
+        {{ m.box('contact_email', 'Public email', values, errors, type='email', attrs='maxlength="200"') }}
+        {{ m.box('contact_phone', 'Public phone', values, errors, type='tel', attrs='maxlength="60"') }}
+        {{ m.box('studio_hours', 'Hours', values, errors, hint='e.g. “By appointment”', attrs='maxlength="300"') }}
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Words on the website</legend>
+      {{ m.box('hero_line', 'Opening line (home page)', values, errors, attrs='maxlength="160"') }}
+      {{ m.box('about_heading', 'Atelier heading', values, errors, hint='Defaults to the brand name.', attrs='maxlength="200"') }}
+      {{ m.box('about_text', 'About the atelier', values, errors, type='textarea', hint='In your own words. Leave empty to show a single line about what you offer.', attrs='rows="6" maxlength="4000"') }}
+    </fieldset>
+
+    <fieldset>
+      <legend>Policies</legend>
+      {{ m.box('rental_terms', 'Rental terms', values, errors, type='textarea', hint='Shown on every rental request; customers must confirm they have read them.', attrs='rows="5" maxlength="6000"') }}
+      {{ m.box('purchase_terms', 'Purchase terms', values, errors, type='textarea', attrs='rows="4" maxlength="6000"') }}
+      {{ m.box('custom_terms', 'Custom-order terms', values, errors, type='textarea', attrs='rows="4" maxlength="6000"') }}
+      {{ m.box('payment_instructions', 'Payment instructions', values, errors, type='textarea', hint='Shown to customers once you confirm an order or approve a rental with a deposit (e.g. bank or e-wallet details).', attrs='rows="4" maxlength="3000"') }}
+    </fieldset>
+
+    <fieldset>
+      <legend>Bookings</legend>
+      <div class="row">
+        {{ m.box('turnaround_days', 'Days between rentals', values, errors, type='number', hint='Cleaning and pressing time after a return before the same piece can go out again.', attrs='min="0" max="30"') }}
+        {{ m.box('rental_cancel_days', 'Online cancellation window (days)', values, errors, type='number', hint='Customers may cancel an approved rental online until this many days before pickup. Leave empty: they must message you.', attrs='min="0" max="365"') }}
+        {{ m.box('booking_horizon_days', 'Booking calendar (days ahead)', values, errors, type='number', attrs='min="14" max="730"') }}
+      </div>
+      <label class="check"><input type="checkbox" name="deposit_before_confirm" value="1" {% if values.deposit_before_confirm == '1' or values.deposit_before_confirm == 1 %}checked{% endif %}> For gowns with a deposit, approved rentals stay “deposit due” until you record the deposit</label>
+    </fieldset>
+
+    <div class="s-sticky-save"><button class="btn" type="submit">Save settings</button></div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Custom gowns · Studio{% endblock %}
+
+{% block main %}
+<header class="s-head"><div><p class="note">Commissions</p><h1>Custom <em>gowns</em></h1></div></header>
+<nav class="s-tabs" aria-label="Custom request views">
+  {% for k, v in VIEWS %}<a href="/studio/custom?view={{ k }}" {% if view == k %}aria-current="true"{% endif %}>{{ v.label }}<span class="note">{{ counts[k] }}</span></a>{% endfor %}
+</nav>
+<div class="s-body">
+  {% if customs.length %}
+  <div class="table-wrap">
+    <table class="table table--stack">
+      <thead><tr><th>Reference</th><th>Occasion</th><th>Customer</th><th>Event</th><th>Budget</th><th>Status</th><th>Received</th></tr></thead>
+      <tbody>
+        {% for c in customs %}
+        <tr>
+          <td data-label="Ref"><a class="ref" href="/studio/custom/{{ c.id }}">{{ c.reference }}</a></td>
+          <td><a class="table__main" href="/studio/custom/{{ c.id }}">{{ c.event_type }}</a></td>
+          <td data-label="Customer">{{ c.contact_name }}</td>
+          <td data-label="Event" class="note">{{ c.event_date | date if c.event_date else '—' }}</td>
+          <td data-label="Budget" class="small">{% if c.budget_min or c.budget_max %}{{ c.budget_min | money }}{% if c.budget_min and c.budget_max %}–{% endif %}{{ c.budget_max | money }}{% else %}—{% endif %}</td>
+          <td data-label="Status">{{ m.statusMark(status.CUSTOM, c.status) }}</td>
+          <td data-label="Received" class="note">{{ c.created_at | stamp }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="empty">Nothing here.</p>{% endif %}
+</div>
+{% endblock %}

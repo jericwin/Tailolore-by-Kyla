@@ -1,0 +1,630 @@
+{
+  "generated": "2026-10-25T07:24:19.731Z",
+  "background": {
+    "path": "assets/backgrounds/consistent-product-background.png",
+    "canvas": "1600x2000",
+    "colors": {
+      "light": "#f6f1e8",
+      "mid": "#eee6d9",
+      "edge": "#e2d7c6",
+      "floor": "#e6dccb"
+    }
+  },
+  "counts": {
+    "gowns/evening-gowns": 7,
+    "menswear/pageant-formalwear": 2,
+    "gowns/pageant-gowns": 1,
+    "costumes": 2,
+    "brand": 1
+  },
+  "items": [
+    {
+      "filename": "dress1.jpg",
+      "original_path": "assets/originals/dress1.jpg",
+      "sha256": "7f6aec55c14f1215c3ca21a1b717b6e262679007aef8ed7c6633f563b4a6088b",
+      "width": 1536,
+      "height": 2048,
+      "reviewed": true,
+      "category": "gowns/evening-gowns",
+      "title": "Teal Beaded Sweetheart Gown",
+      "slug": "teal-beaded-sweetheart-gown",
+      "visible_details": "Strapless gown on a dress form. Pleated sweetheart bodice in teal edged with gold beads, a beaded line across the waist, and a long gathered skirt that pools into a short train.",
+      "publish": true,
+      "showcase": "signature",
+      "showcase_rank": 3,
+      "people_note": null,
+      "notes": "Shot in a kitchen; counters touch the skirt at waist height — check the cut-out at the counter line.",
+      "duplicate_of": null,
+      "background_removal": {
+        "status": "done",
+        "model": "birefnet-general-lite",
+        "processed_on": "2026-10-25",
+        "subject_box": {
+          "left": 191,
+          "top": 166,
+          "width": 1034,
+          "height": 1882
+        },
+        "cropped_bottom_in_original": true,
+        "kept_regions": 1,
+        "stray_pixels_removed": 0,
+        "visual_review": "Accepted. Hem, train and gold beading intact; counter line removed cleanly. A small yellow tag at the form neck is part of the original photograph."
+      },
+      "transparent_master": "assets/processed/gowns/evening-gowns/teal-beaded-sweetheart-gown.png",
+      "display_path": "assets/processed/gowns/evening-gowns/teal-beaded-sweetheart-gown-studio.jpg",
+      "details": [
+        {
+          "path": "assets/processed/gowns/evening-gowns/teal-beaded-sweetheart-gown-detail-1.jpg",
+          "caption": "Gold beading along the sweetheart neckline",
+          "crop": {
+            "left": 600,
+            "top": 430,
+            "width": 420,
+            "height": 380
+          }
+        }
+      ],
+      "display_layout": {
+        "canvas": "1600x2000",
+        "scale": 0.9777,
+        "left": 295,
+        "top": 160,
+        "width": 1011,
+        "height": 1840,
+        "croppedBottom": true
+      }
+    },
+    {
+      "filename": "dress2.jpg",
+      "original_path": "assets/originals/dress2.jpg",
+      "sha256": "5a5b6f00c7b05e455ebfda63c26316306f9008ba810d3cdede6944ed6a8ccd2a",
+      "width": 1536,
+      "height": 2048,
+      "reviewed": true,
+      "category": "gowns/evening-gowns",
+      "title": "Fuchsia Pearl Sweetheart Gown",
+      "slug": "fuchsia-pearl-sweetheart-gown",
+      "visible_details": "Strapless fuchsia gown on a dress form with a corseted, seamed bodice, pearl clusters along the neckline and waist, and a sheer flowing overskirt with a train.",
+      "publish": true,
+      "showcase": "signature",
+      "showcase_rank": 5,
+      "people_note": null,
+      "notes": "Sheer overskirt: verify transparency is kept rather than filled or clipped.",
+      "duplicate_of": null,
+      "background_removal": {
+        "status": "done",
+        "model": "birefnet-general-lite",
+        "processed_on": "2026-10-25",
+        "subject_box": {
+          "left": 186,
+          "top": 92,
+          "width": 1138,
+          "height": 1956
+        },
+        "cropped_bottom_in_original": true,
+        "kept_regions": 1,
+        "stray_pixels_removed": 0,
+        "visual_review": "Accepted. Pearl trim and the ruffled hem edge intact. The sheer overskirt is kept as fabric."
+      },
+      "transparent_master": "assets/processed/gowns/evening-gowns/fuchsia-pearl-sweetheart-gown.png",
+      "display_path": "assets/processed/gowns/evening-gowns/fuchsia-pearl-sweetheart-gown-studio.jpg",
+      "details": [],
+      "display_layout": {
+        "canvas": "1600x2000",
+        "scale": 0.9407,
+        "left": 265,
+        "top": 160,
+        "width": 1071,
+        "height": 1840,
+        "croppedBottom": true
+      }
+    },
+    {
+      "filename": "dress3.jpg",
+      "original_path": "assets/originals/dress3.jpg",
+      "sha256": "d4c7cd62b0263045af050d4967a7d28db2193d11116741fb835fd01153945935",
+      "width": 1080,
+      "height": 1550,
+      "reviewed": true,
+      "category": "gowns/evening-gowns",
+      "title": "Ivory Pearl Drape Gown",
+      "slug": "ivory-pearl-drape-gown",
+      "visible_details": "Strapless ivory gown on a dress form with a diagonal draped panel across the bodice, pearl clusters at the neckline and waist, and a long skirt with a train.",
+      "publish": true,
+      "showcase": "signature",
+      "showcase_rank": 6,
+      "people_note": null,
+      "notes": "White gown: could suit bridal or debut wear, but the photograph does not say so — left as an evening gown. Lower resolution (1080×1550) screenshot with a slight dark border.",
+      "duplicate_of": null,
+      "background_removal": {
+        "status": "done",
+        "model": "birefnet-general-lite",
+        "processed_on": "2026-10-25",
+        "subject_box": {
+          "left": 285,
+          "top": 56,
+          "width": 532,
+          "height": 1494
+        },
+        "cropped_bottom_in_original": true,
+        "kept_regions": 1,
+        "stray_pixels_removed": 0,
+        "visual_review": "Accepted. Draped panel and pearl clusters intact; the screenshot border did not carry over."
+      },
+      "transparent_master": "assets/processed/gowns/evening-gowns/ivory-pearl-drape-gown.png",
+      "display_path": "assets/processed/gowns/evening-gowns/ivory-pearl-drape-gown-studio.jpg",
+      "details": [],
+      "display_layout": {
+        "canvas": "1600x2000",
+        "scale": 1.2316,
+        "left": 473,
+        "top": 160,
+        "width": 655,
+        "height": 1840,
+        "croppedBottom": true
+      }
+    },
+    {
+      "filename": "dress4.jpg",
+      "original_path": "assets/originals/dress4.jpg",
+      "sha256": "ce6da1da0dcdfa79fef74994b1c7915e6193fc39176a2023da036123ec2206a7",
+      "width": 1536,
+      "height": 2048,
+      "reviewed": true,
+      "category": "menswear/pageant-formalwear",
+      "title": "Crimson Wing Formal Set",
+      "slug": "crimson-wing-formal-set",
+      "visible_details": "Red satin long-sleeved top with a stand collar, crystal drops down the front, a sequined tulle panel sweeping across the body like a wing, and matching trousers.",
+      "publish": true,
+      "showcase": null,
+      "showcase_rank": null,
+      "people_note": "Worn by a young pageant participant backstage (contestant rosette visible). May be a minor — confirm the family's consent before publishing widely.",
+      "notes": "Cropped below the knee in the original, so it is presented as a half-length portrait.",
+      "duplicate_of": null,
+      "background_removal": {
+        "status": "done",
+        "model": "birefnet-general-lite",
+        "processed_on": "2026-10-25",
+        "subject_box": {
+          "left": 464,
+          "top": 385,
+          "width": 740,
+          "height": 1663
+        },
+        "cropped_bottom_in_original": true,
+        "kept_regions": 1,
+        "stray_pixels_removed": 0,
+        "visual_review": "Accepted. Sequined wing panel and drops intact; the contestant rosette is pinned to the outfit and was kept."
+      },
+      "transparent_master": "assets/processed/menswear/pageant-formalwear/crimson-wing-formal-set.png",
+      "display_path": "assets/processed/menswear/pageant-formalwear/crimson-wing-formal-set-studio.jpg",
+      "details": [],
+      "display_layout": {
+        "canvas": "1600x2000",
+        "scale": 1.1064,
+        "left": 391,
+        "top": 160,
+        "width": 819,
+        "height": 1840,
+        "croppedBottom": true
+      }
+    },
+    {
+      "filename": "dress5.jpg",
+      "original_path": "assets/originals/dress5.jpg",
+      "sha256": "ce58ad0396d8f5d16e654e8615c3446ddc03e252c1377983a69d7390accdd621",
+      "width": 1536,
+      "height": 2048,
+      "reviewed": true,
+      "category": "menswear/pageant-formalwear",
+      "title": "Verdant Embroidered Formal Set",
+      "slug": "verdant-embroidered-formal-set",
+      "visible_details": "Green satin long-sleeved top with gold and green floral embroidery, sequins and stones, a beaded fringe across the front, matching trousers, and a woven hat carried in hand.",
+      "publish": true,
+      "showcase": null,
+      "showcase_rank": null,
+      "people_note": "Worn by a young pageant participant backstage. May be a minor — confirm consent before publishing widely.",
+      "notes": "Heritage-inspired details, but no specific regional or national costume is claimed.",
+      "duplicate_of": null,
+      "background_removal": {
+        "status": "done",
+        "model": "birefnet-general-lite",
+        "processed_on": "2026-10-25",
+        "subject_box": {
+          "left": 336,
+          "top": 456,
+          "width": 760,
+          "height": 1592
+        },
+        "cropped_bottom_in_original": true,
+        "kept_regions": 1,
+        "stray_pixels_removed": 0,
+        "visual_review": "Accepted. Embroidery, fringe and the woven hat intact."
+      },
+      "transparent_master": "assets/processed/menswear/pageant-formalwear/verdant-embroidered-formal-set.png",
+      "display_path": "assets/processed/menswear/pageant-formalwear/verdant-embroidered-formal-set-studio.jpg",
+      "details": [],
+      "display_layout": {
+        "canvas": "1600x2000",
+        "scale": 1.1558,
+        "left": 361,
+        "top": 160,
+        "width": 878,
+        "height": 1840,
+        "croppedBottom": true
+      }
+    },
+    {
+      "filename": "dress6.jpg",
+      "original_path": "assets/originals/dress6.jpg",
+      "sha256": "bd363c2eca3bf3002947ffba842acac951565ca9d2259f42f60077f53babd703",
+      "width": 1536,
+      "height": 2048,
+      "reviewed": true,
+      "category": "gowns/pageant-gowns",
+      "title": "Rose Bodice Pageant Gown",
+      "slug": "rose-bodice-pageant-gown",
+      "visible_details": "Red gown with a bodice of sculpted fabric roses, one structured shoulder with beaded fringe, a beaded column skirt with a front slit, layered tulle train, and red lace gloves.",
+      "publish": true,
+      "showcase": null,
+      "showcase_rank": null,
+      "people_note": "Worn by a young pageant contestant (rosette visible). May be a minor — confirm consent before publishing widely.",
+      "notes": "Cropped at the knee in the original.",
+      "duplicate_of": null,
+      "background_removal": {
+        "status": "done",
+        "model": "birefnet-general-lite",
+        "processed_on": "2026-10-25",
+        "subject_box": {
+          "left": 273,
+          "top": 378,
+          "width": 1161,
+          "height": 1670
+        },
+        "cropped_bottom_in_original": true,
+        "kept_regions": 1,
+        "stray_pixels_removed": 0,
+        "visual_review": "Accepted. Rose bodice, fringe, gloves and tulle train intact."
+      },
+      "transparent_master": "assets/processed/gowns/pageant-gowns/rose-bodice-pageant-gown.png",
+      "display_path": "assets/processed/gowns/pageant-gowns/rose-bodice-pageant-gown-studio.jpg",
+      "details": [],
+      "display_layout": {
+        "canvas": "1600x2000",
+        "scale": 1.1018,
+        "left": 161,
+        "top": 160,
+        "width": 1279,
+        "height": 1840,
+        "croppedBottom": true
+      }
+    },
+    {
+      "filename": "dress7.jpg",
+      "original_path": "assets/originals/dress7.jpg",
+      "sha256": "1f03d8c59f3317daa4d5315da557d573cce0e2673c02ebf8a31cc0ffbcacfa64",
+      "width": 1350,
+      "height": 1800,
+      "reviewed": true,
+      "category": "costumes",
+      "title": "Heritage Pageant Costume",
+      "slug": "heritage-pageant-costume",
+      "visible_details": "Heavily trimmed jacket and front panel in gold, rust and cream woven bands with large red stones, beaded chains and a matching headband.",
+      "publish": false,
+      "showcase": null,
+      "showcase_rank": null,
+      "people_note": "Official portrait from a school event (Hari at Reyna ng Wika at Kasaysayan 2026, Liceo de Pakil) with the student's full name and grade printed on it. Not published: needs the student's and school's consent. The cut-out removes the printed name and logos, but the face remains.",
+      "notes": "Heritage-themed pageant costume; no specific ethnic attribution is made.",
+      "duplicate_of": null,
+      "background_removal": {
+        "status": "done",
+        "model": "birefnet-general-lite",
+        "processed_on": "2026-10-25",
+        "subject_box": {
+          "left": 190,
+          "top": 266,
+          "width": 897,
+          "height": 1366
+        },
+        "cropped_bottom_in_original": false,
+        "kept_regions": 1,
+        "stray_pixels_removed": 2105,
+        "visual_review": "Usable but imperfect: the bamboo pole held in the original was removed as background, leaving the hand closed around nothing. Not published."
+      },
+      "transparent_master": "assets/processed/costumes/heritage-pageant-costume.png",
+      "display_path": "assets/processed/costumes/heritage-pageant-costume-studio.jpg",
+      "details": [],
+      "display_layout": {
+        "canvas": "1600x2000",
+        "scale": 1.2592,
+        "left": 236,
+        "top": 150,
+        "width": 1129,
+        "height": 1720,
+        "croppedBottom": false
+      }
+    },
+    {
+      "filename": "dress8.jpg",
+      "original_path": "assets/originals/dress8.jpg",
+      "sha256": "ca7d3cb1876d0e38536888f11193ec87e112d4e94720387ea8c94ad80725eba1",
+      "width": 1638,
+      "height": 2048,
+      "reviewed": true,
+      "category": "costumes",
+      "title": "Sunburst Headdress Costume",
+      "slug": "sunburst-headdress-costume",
+      "visible_details": "Beaded green and gold bodysuit-style costume with wooden-bead and crystal fringes, a sheer embellished lower section, a velvet side panel, and a large sunburst headdress with red stones.",
+      "publish": true,
+      "showcase": null,
+      "showcase_rank": null,
+      "people_note": null,
+      "notes": "Background is a composited green blur; the headdress edges need checking. Cropped at the thigh.",
+      "duplicate_of": null,
+      "background_removal": {
+        "status": "done",
+        "model": "birefnet-general-lite",
+        "processed_on": "2026-10-25",
+        "subject_box": {
+          "left": 177,
+          "top": 25,
+          "width": 1236,
+          "height": 2023
+        },
+        "cropped_bottom_in_original": true,
+        "kept_regions": 1,
+        "stray_pixels_removed": 0,
+        "visual_review": "Accepted. Headdress points, stones and bead fringes intact against the composited background."
+      },
+      "transparent_master": "assets/processed/costumes/sunburst-headdress-costume.png",
+      "display_path": "assets/processed/costumes/sunburst-headdress-costume-studio.jpg",
+      "details": [],
+      "display_layout": {
+        "canvas": "1600x2000",
+        "scale": 0.9095,
+        "left": 238,
+        "top": 160,
+        "width": 1124,
+        "height": 1840,
+        "croppedBottom": true
+      }
+    },
+    {
+      "filename": "dress9.jpg",
+      "original_path": "assets/originals/dress9.jpg",
+      "sha256": "05caefcf6fc16c40bd29431669ddfec52f36e372462d2c26c9a2562383f97d8c",
+      "width": 1638,
+      "height": 2048,
+      "reviewed": true,
+      "category": "gowns/evening-gowns",
+      "title": "Ember Beaded Gown",
+      "slug": "ember-beaded-gown",
+      "visible_details": "Orange and red gown with capped shoulders, a bodice and hip panel of overlapping beaded teardrop motifs, a midriff cut-out with bead drops, and a sheer crystal-scattered skirt with a high slit.",
+      "publish": true,
+      "showcase": "signature",
+      "showcase_rank": 4,
+      "people_note": null,
+      "notes": "Already on a white studio backdrop. Similar framing to dress10 (same model and studio) but a different gown — not a duplicate.",
+      "duplicate_of": null,
+      "background_removal": {
+        "status": "done",
+        "model": "birefnet-general-lite",
+        "processed_on": "2026-10-25",
+        "subject_box": {
+          "left": 448,
+          "top": 16,
+          "width": 891,
+          "height": 2032
+        },
+        "cropped_bottom_in_original": true,
+        "kept_regions": 1,
+        "stray_pixels_removed": 0,
+        "visual_review": "Accepted. Sheer beaded skirt and bead drops intact."
+      },
+      "transparent_master": "assets/processed/gowns/evening-gowns/ember-beaded-gown.png",
+      "display_path": "assets/processed/gowns/evening-gowns/ember-beaded-gown-studio.jpg",
+      "details": [
+        {
+          "path": "assets/processed/gowns/evening-gowns/ember-beaded-gown-detail-1.jpg",
+          "caption": "Overlapping beaded teardrop motifs",
+          "crop": {
+            "left": 570,
+            "top": 420,
+            "width": 560,
+            "height": 600
+          }
+        }
+      ],
+      "display_layout": {
+        "canvas": "1600x2000",
+        "scale": 0.9055,
+        "left": 397,
+        "top": 160,
+        "width": 807,
+        "height": 1840,
+        "croppedBottom": true
+      }
+    },
+    {
+      "filename": "dress10.jpg",
+      "original_path": "assets/originals/dress10.jpg",
+      "sha256": "707752f76a4fd28ad7a69bacdc83bf25e699879755a809b7499714bcb8ee69b6",
+      "width": 768,
+      "height": 960,
+      "reviewed": true,
+      "category": "gowns/evening-gowns",
+      "title": "Gilded Fringe Gown",
+      "slug": "gilded-fringe-gown",
+      "visible_details": "Gold gown with a wide folded off-shoulder neckline edged in crystals and beaded fringe, gold appliqué at the bust, and a fitted sequined skirt flaring at the hem.",
+      "publish": true,
+      "showcase": "signature",
+      "showcase_rank": 2,
+      "people_note": null,
+      "notes": "Low resolution (768×960) — shown at modest sizes. Similar framing to dress9 but a different gown.",
+      "duplicate_of": null,
+      "background_removal": {
+        "status": "done",
+        "model": "birefnet-general-lite",
+        "processed_on": "2026-10-25",
+        "subject_box": {
+          "left": 186,
+          "top": 16,
+          "width": 376,
+          "height": 944
+        },
+        "cropped_bottom_in_original": true,
+        "kept_regions": 1,
+        "stray_pixels_removed": 12,
+        "visual_review": "Accepted. Beaded fringe at the neckline intact; low source resolution."
+      },
+      "transparent_master": "assets/processed/gowns/evening-gowns/gilded-fringe-gown.png",
+      "display_path": "assets/processed/gowns/evening-gowns/gilded-fringe-gown-studio.jpg",
+      "details": [],
+      "display_layout": {
+        "canvas": "1600x2000",
+        "scale": 1.9492,
+        "left": 434,
+        "top": 160,
+        "width": 733,
+        "height": 1840,
+        "croppedBottom": true
+      }
+    },
+    {
+      "filename": "dress11.jpg",
+      "original_path": "assets/originals/dress11.jpg",
+      "sha256": "62186575e92f00d9b2803d289c4368e816f9a06c7b3e1445f08e0a6167865785",
+      "width": 1536,
+      "height": 2048,
+      "reviewed": true,
+      "category": "gowns/evening-gowns",
+      "title": "Red Sunburst Gown",
+      "slug": "red-sunburst-gown",
+      "visible_details": "Red gown on a dress form with a high fan of pleated, glittered tulle at the neckline, voluminous puff sleeves, a beaded and sequined sunburst radiating from the waist, and a sweeping overskirt train.",
+      "publish": true,
+      "showcase": "masterpiece",
+      "showcase_rank": 0,
+      "people_note": null,
+      "notes": "Strongest silhouette and handwork in the set. Train runs off the bottom edge of the photograph.",
+      "duplicate_of": null,
+      "background_removal": {
+        "status": "done",
+        "model": "birefnet-general-lite",
+        "processed_on": "2026-10-25",
+        "subject_box": {
+          "left": 237,
+          "top": 130,
+          "width": 1299,
+          "height": 1918
+        },
+        "cropped_bottom_in_original": true,
+        "kept_regions": 1,
+        "stray_pixels_removed": 0,
+        "visual_review": "Accepted. Pleated tulle fan, puff sleeves and the overskirt train intact; dress form kept."
+      },
+      "transparent_master": "assets/processed/gowns/evening-gowns/red-sunburst-gown.png",
+      "display_path": "assets/processed/gowns/evening-gowns/red-sunburst-gown-studio.jpg",
+      "details": [
+        {
+          "path": "assets/processed/gowns/evening-gowns/red-sunburst-gown-detail-1.jpg",
+          "caption": "Sequined sunburst radiating from the waist",
+          "crop": {
+            "left": 570,
+            "top": 600,
+            "width": 420,
+            "height": 780
+          }
+        }
+      ],
+      "display_layout": {
+        "canvas": "1600x2000",
+        "scale": 0.9593,
+        "left": 177,
+        "top": 160,
+        "width": 1246,
+        "height": 1840,
+        "croppedBottom": true
+      }
+    },
+    {
+      "filename": "dress12.jpg",
+      "original_path": "assets/originals/dress12.jpg",
+      "sha256": "2e85348eab6a647f74c4f5fabdfbdc31ab63f40293755589f8c518274ac59adc",
+      "width": 1536,
+      "height": 2048,
+      "reviewed": true,
+      "category": "gowns/evening-gowns",
+      "title": "Fuchsia Sculpted Drape Gown",
+      "slug": "fuchsia-sculpted-drape-gown",
+      "visible_details": "Fuchsia one-shoulder gown with a sculpted pleated drape wrapping the bodice and hip, crystal bead fringe, a radiating beaded panel, a large crystal brooch, and a glittered overskirt.",
+      "publish": true,
+      "showcase": "signature",
+      "showcase_rank": 1,
+      "people_note": null,
+      "notes": "Second showpiece. Busy room behind; stair edge touches the skirt on the right.",
+      "duplicate_of": null,
+      "background_removal": {
+        "status": "done",
+        "model": "birefnet-general-lite",
+        "processed_on": "2026-10-25",
+        "subject_box": {
+          "left": 381,
+          "top": 184,
+          "width": 841,
+          "height": 1864
+        },
+        "cropped_bottom_in_original": true,
+        "kept_regions": 1,
+        "stray_pixels_removed": 0,
+        "visual_review": "Accepted. Crystal fringe and brooch intact; the stair edge was removed."
+      },
+      "transparent_master": "assets/processed/gowns/evening-gowns/fuchsia-sculpted-drape-gown.png",
+      "display_path": "assets/processed/gowns/evening-gowns/fuchsia-sculpted-drape-gown-studio.jpg",
+      "details": [
+        {
+          "path": "assets/processed/gowns/evening-gowns/fuchsia-sculpted-drape-gown-detail-1.jpg",
+          "caption": "Crystal brooch and radiating beadwork",
+          "crop": {
+            "left": 600,
+            "top": 560,
+            "width": 440,
+            "height": 560
+          }
+        }
+      ],
+      "display_layout": {
+        "canvas": "1600x2000",
+        "scale": 0.9871,
+        "left": 385,
+        "top": 160,
+        "width": 830,
+        "height": 1840,
+        "croppedBottom": true
+      }
+    },
+    {
+      "filename": "logo.jpg",
+      "original_path": "assets/originals/logo.jpg",
+      "sha256": "1f7a403e21b530d2f06ebe1289a3030128364888d361294818dd44da03f36bb7",
+      "width": 2000,
+      "height": 2000,
+      "reviewed": true,
+      "category": "brand",
+      "title": "Tailored by Kyla logo",
+      "slug": "tailored-by-kyla-logo",
+      "visible_details": "White TK monogram and script wordmark on black.",
+      "publish": false,
+      "showcase": null,
+      "showcase_rank": null,
+      "people_note": null,
+      "notes": "Brand asset, not clothing. Used by `npm run brand:assets`.",
+      "duplicate_of": null,
+      "background_removal": {
+        "status": "not_applicable"
+      },
+      "transparent_master": null,
+      "display_path": null,
+      "details": []
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+
+{% block main %}
+<header class="s-head">
+  <div><p class="note">{{ today() | date }}</p><h1>Good day, <em>{{ user.fullName.split(' ')[0] }}</em></h1></div>
+  <div class="s-head__actions"><a class="btn btn--small" href="/studio/gowns/new">New gown</a></div>
+</header>
+
+<div class="s-body">
+  <div class="figures">
+    <a href="/studio/gowns?listing=published"><span class="note">Published gowns</span><strong>{{ stats.published }}</strong></a>
+    <a href="/studio/gowns?listing=published"><span class="note">Available now</span><strong>{{ stats.available }}</strong></a>
+    <a href="/studio/rentals?view=pending" class="{% if stats.pending_rentals %}is-hot{% endif %}"><span class="note">Rental requests</span><strong>{{ stats.pending_rentals }}</strong></a>
+    <a href="/studio/rentals?view=upcoming"><span class="note">Upcoming rentals</span><strong>{{ stats.upcoming_rentals }}</strong></a>
+    <a href="/studio/orders?view=pending" class="{% if stats.pending_orders %}is-hot{% endif %}"><span class="note">Orders to confirm</span><strong>{{ stats.pending_orders }}</strong></a>
+    <a href="/studio/custom?view=new" class="{% if stats.new_custom %}is-hot{% endif %}"><span class="note">New custom requests</span><strong>{{ stats.new_custom }}</strong></a>
+  </div>
+
+  {% if stats.published == 0 %}
+  <div class="warn">
+    {% if stats.drafts %}You have {{ stats.drafts }} draft{% if stats.drafts > 1 %}s{% endif %}. <a href="/studio/gowns?listing=draft">Finish and publish them</a> so they appear on the website.
+    {% else %}No gowns are on the website yet. <a href="/studio/gowns/new">Add your first gown</a> — name, photographs, and how it can be worn.{% endif %}
+  </div>
+  {% endif %}
+
+  <div class="s-grid s-grid--main">
+    <section class="s-section">
+      <h2>Awaiting your action <span class="note">{{ actions.length }}</span></h2>
+      {% if actions.length %}
+      <div class="table-wrap">
+        <table class="table table--stack">
+          <thead><tr><th>Reference</th><th>What</th><th>Customer</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody>
+            {% for a in actions %}
+            {% set link = '/studio/' + ({ rental: 'rentals', order: 'orders', custom: 'custom' }[a.type]) + '/' + a.id %}
+            {% set map = { rental: status.RENTAL, order: status.ORDER, custom: status.CUSTOM }[a.type] %}
+            <tr>
+              <td data-label="Ref"><a class="ref" href="{{ link }}">{{ a.reference }}</a></td>
+              <td data-label="What"><a href="{{ link }}"><span class="note">{{ { rental: 'Rental', order: 'Purchase', custom: 'Custom' }[a.type] }}</span> · {{ a.subject }}</a></td>
+              <td data-label="Customer">{{ a.customer }}</td>
+              <td data-label="Status">{{ m.statusMark(map, a.status) }}</td>
+              <td data-label="Date" class="note">{% if a.due %}{{ a.due | date('short') }}{% else %}{{ a.created_at | stamp }}{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="empty">Nothing waiting. New requests appear here as they arrive.</p>
+      {% endif %}
+    </section>
+
+    <section class="s-section">
+      <h2>Rental calendar <a class="note" href="/studio/rentals?view=upcoming">All</a></h2>
+      {% if upcoming.length %}
+      <ul class="calendar-list">
+        {% for r in upcoming %}
+        <li>
+          <span class="note">{{ r.pickup_date | date('short') }}–{{ r.return_date | date('short') }}</span>
+          <a href="/studio/rentals/{{ r.id }}">{{ r.gown_name }}{% if r.unit_label %} <span class="muted">({{ r.unit_label }})</span>{% endif %}<br><span class="small muted">{{ r.customer }}</span></a>
+          {{ m.statusMark(status.RENTAL, r.status) }}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="empty">No approved rentals coming up.</p>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

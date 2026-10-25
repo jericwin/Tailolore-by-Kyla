@@ -1,0 +1,38 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Purchases · Studio{% endblock %}
+
+{% block main %}
+<header class="s-head"><div><p class="note">Orders</p><h1>Purchases</h1></div></header>
+<nav class="s-tabs" aria-label="Order views">
+  {% for k, v in VIEWS %}<a href="/studio/orders?view={{ k }}" {% if view == k %}aria-current="true"{% endif %}>{{ v.label }}<span class="note">{{ counts[k] }}</span></a>{% endfor %}
+</nav>
+<div class="s-body">
+  <form class="s-search boxed" method="get" action="/studio/orders">
+    <input type="hidden" name="view" value="{{ view }}">
+    <label class="visually-hidden" for="q">Search</label>
+    <input class="input" id="q" name="q" value="{{ q }}" placeholder="Reference, customer or gown">
+    <button class="btn btn--ghost btn--small" type="submit">Search</button>
+  </form>
+  {% if orders.length %}
+  <div class="table-wrap">
+    <table class="table table--stack">
+      <thead><tr><th>Reference</th><th>Gown</th><th>Customer</th><th class="num">Price</th><th>Status</th><th>Payment</th><th>Placed</th></tr></thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td data-label="Ref"><a class="ref" href="/studio/orders/{{ o.id }}">{{ o.reference }}</a></td>
+          <td><a class="table__main" href="/studio/orders/{{ o.id }}">{{ o.gown_name }}</a></td>
+          <td data-label="Customer">{{ o.customer }}</td>
+          <td data-label="Price" class="num">{{ o.quoted_price | money }}</td>
+          <td data-label="Status">{{ m.statusMark(status.ORDER, o.status) }}</td>
+          <td data-label="Payment" class="small">{{ status.PAYMENT[o.payment_status] }}</td>
+          <td data-label="Placed" class="note">{{ o.created_at | stamp }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="empty">Nothing here.</p>{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Gowns · Studio{% endblock %}
+
+{% block main %}
+<header class="s-head">
+  <div><p class="note">Listings</p><h1>Gowns</h1></div>
+  <div class="s-head__actions"><a class="btn btn--small" href="/studio/gowns/new">New gown</a></div>
+</header>
+<nav class="s-tabs" aria-label="Listing status">
+  <a href="/studio/gowns" {% if not filter %}aria-current="true"{% endif %}>Current</a>
+  {% for k, label in status.LISTING %}
+  <a href="/studio/gowns?listing={{ k }}" {% if filter == k %}aria-current="true"{% endif %}>{{ label }}<span class="note">{{ counts[k] or 0 }}</span></a>
+  {% endfor %}
+</nav>
+<div class="s-body">
+  {% if categories.length %}
+  <form class="s-search" method="get" action="/studio/gowns">
+    {% if filter %}<input type="hidden" name="listing" value="{{ filter }}">{% endif %}
+    <label class="visually-hidden" for="cat">Category</label>
+    <select class="select" id="cat" name="category" style="border: 1px solid var(--rule); padding-left: .6rem">
+      <option value="">All categories</option>
+      {% for c in categories %}<option value="{{ c.id }}" {% if cat == c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+    </select>
+    <button class="btn btn--ghost btn--small" type="submit">Filter</button>
+  </form>
+  {% endif %}
+
+  {% if gowns.length %}
+  <div class="table-wrap">
+    <table class="table table--stack">
+      <thead><tr><th></th><th>Gown</th><th>Listing</th><th>Availability</th><th>Offered</th><th class="num">Rent</th><th class="num">Buy</th><th>Photos</th><th>Updated</th></tr></thead>
+      <tbody>
+        {% for g in gowns %}
+        <tr>
+          <td class="thumb-cell">{% if g.thumb_key %}<img class="thumb" src="{{ imgSrc(g.thumb_key, 480) }}" alt="" loading="lazy">{% else %}<span class="thumb"></span>{% endif %}</td>
+          <td><a class="table__main" href="/studio/gowns/{{ g.id }}">{{ g.name }}</a>{% if g.category_name %}<br><span class="note">{{ g.category_name }}</span>{% endif %}{% if g.pending_rentals %}<br><a class="status status--action" href="/studio/rentals?q={{ g.name | urlencode }}">{{ g.pending_rentals }} request{% if g.pending_rentals > 1 %}s{% endif %}</a>{% endif %}</td>
+          <td data-label="Listing"><span class="status status--{{ { published: 'ok', draft: 'pending', unpublished: 'neutral', archived: 'closed' }[g.listing_status] }}">{{ status.LISTING[g.listing_status] }}</span></td>
+          <td data-label="Availability">{{ status.AVAILABILITY[g.availability_status] }}{% if g.units_active > 1 %} <span class="note">· {{ g.units_active }} pieces</span>{% endif %}</td>
+          <td data-label="Offered" class="small">{{ m.services(g) or '—' }}</td>
+          <td data-label="Rent" class="num">{{ g.rental_price | money or '—' }}</td>
+          <td data-label="Buy" class="num">{{ g.purchase_price | money or '—' }}</td>
+          <td data-label="Photos">{{ g.image_count }}</td>
+          <td data-label="Updated" class="note">{{ g.updated_at | stamp }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No gowns here yet. <a href="/studio/gowns/new">Add a gown</a>.</p>
+  {% endif %}
+</div>
+{% endblock %}

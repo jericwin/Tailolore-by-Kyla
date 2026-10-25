@@ -1,0 +1,87 @@
+{% extends "layouts/site.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}{% if filters.section %}{{ SECTIONS[filters.section].label }}{% else %}Collection{% endif %} · {{ site.brand_name }}{% endblock %}
+{% block bodyClass %}collection{% endblock %}
+
+{#- Changing the section clears the category, since categories belong to one section. -#}
+{% macro filterLink(filters, label, key, value) -%}
+<a href="{{ href('/collection', filters, {
+  section: value if key == 'section' else filters.section,
+  category: value if key == 'category' else ('' if key == 'section' else filters.category),
+  service: value if key == 'service' else filters.service,
+  availability: value if key == 'availability' else filters.availability }) }}" {% if filters[key] == value %}aria-current="true"{% endif %}>{{ label }}</a>
+{%- endmacro %}
+
+{% block main %}
+{% set current = SECTIONS[filters.section] if filters.section else null %}
+<header class="page-head">
+  <p class="note">§ 01{% if current %} — The collection{% endif %}</p>
+  {% if current %}
+  <h1>{{ current.label }}</h1>
+  {% if current.line %}<p class="page-head__aside">{{ current.line }}. Choose a piece to see its photographs, sizes and how it can be worn.</p>{% endif %}
+  {% else %}
+  <h1>The <em>collection</em></h1>
+  <p class="page-head__aside">Every piece can be viewed in full. Choose one to see its photographs, sizes and how it can be worn — rented for a date, bought, or made again for you.</p>
+  {% endif %}
+</header>
+
+<nav class="filters" aria-label="Filter the collection">
+  {% if sections.length > 1 %}
+  <div class="filters__group">
+    <span class="note">Section</span>
+    {{ filterLink(filters, 'Everything', 'section', '') }}
+    {% for s in sections %}{{ filterLink(filters, s.label, 'section', s.key) }}{% endfor %}
+  </div>
+  {% endif %}
+  {% if categories.length > 1 %}
+  <div class="filters__group">
+    <span class="note">Category</span>
+    {{ filterLink(filters, 'All', 'category', '') }}
+    {% for c in categories %}{{ filterLink(filters, c.name, 'category', c.slug) }}{% endfor %}
+  </div>
+  {% endif %}
+  <div class="filters__group">
+    <span class="note">Wear it</span>
+    {{ filterLink(filters, 'Any way', 'service', '') }}
+    {% for k, label in SERVICES %}{{ filterLink(filters, label, 'service', k) }}{% endfor %}
+  </div>
+  <div class="filters__group">
+    <span class="note">Availability</span>
+    {{ filterLink(filters, 'Any', 'availability', '') }}
+    {{ filterLink(filters, 'Available now', 'availability', 'available') }}
+  </div>
+  <span class="filters__count note" aria-live="polite">{{ gowns.length }} piece{% if gowns.length != 1 %}s{% endif %}</span>
+</nav>
+
+{% if gowns.length %}
+<ol class="lookbook__grid" role="list">
+  {% for g in gowns %}
+  {% set svc = m.services(g) | trim %}
+  <li class="look look--s{{ loop.index0 % 7 }} {% if g.main %}look--{{ g.main.orientation }}{% endif %} reveal">
+    <a class="look__link" href="/gowns/{{ g.slug }}">
+      {{ m.plate(g.main, sizes='(min-width: 900px) 38vw, (min-width: 600px) 60vw, 92vw', alt=g.name, eager=loop.index < 3) }}
+      <span class="look__cap">
+        <span class="note">Pl. {{ loop.index | pad }}</span>
+        <span class="look__name">{{ g.name }}</span>
+        <span class="eyebrow">{{ svc }}{% if g.category_name %}{% if svc %} — {% endif %}{{ g.category_name }}{% endif %}</span>
+        {% if g.availability_status != 'available' %}
+        <span class="look__flags"><span class="status status--{{ 'closed' if g.availability_status in ['sold', 'unavailable'] else 'pending' }}">{{ status.AVAILABILITY[g.availability_status] }}</span></span>
+        {% endif %}
+      </span>
+    </a>
+  </li>
+  {% endfor %}
+</ol>
+<div style="height: clamp(4rem, 8vw, 7rem)"></div>
+{% else %}
+<div class="empty-state">
+  {% if anyFilter %}
+  <p class="lede">Nothing matches that combination at the moment.</p>
+  <a class="link" href="/collection">See every piece <span class="arrow">→</span></a>
+  {% else %}
+  <p class="lede">The first pieces are being photographed for this page.</p>
+  <p class="muted">Meanwhile you can <a href="/commission">request a gown made for you</a>{% if site.facebook_url %} or see recent pieces on <a href="{{ site.facebook_url }}" rel="noopener" target="_blank">Facebook</a>{% endif %}.</p>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,216 @@
+{
+  "_about": "Image-by-image review of assets/originals. Edit and rerun `npm run assets:organize`. Titles are working titles taken from what is visible in each photograph — Kyla should rename them. Nothing here states fabrics, sizes or prices; only visible features are described. Category values are folder paths under assets/processed. 'publish' controls whether the import creates a published listing; 'showcase' is masterpiece | signature | null. 'details' are close-up crops cut from the original photograph (x, y, w, h in original pixels). showcase_rank orders the signature gowns (lower first).",
+  "reviewed_on": "2026-10-25",
+  "images": [
+    {
+      "file": "dress1.jpg",
+      "category": "gowns/evening-gowns",
+      "title": "Teal Beaded Sweetheart Gown",
+      "visible": "Strapless gown on a dress form. Pleated sweetheart bodice in teal edged with gold beads, a beaded line across the waist, and a long gathered skirt that pools into a short train.",
+      "remove_background": true,
+      "publish": true,
+      "showcase": "signature",
+      "details": [
+        {
+          "x": 600,
+          "y": 430,
+          "w": 420,
+          "h": 380,
+          "caption": "Gold beading along the sweetheart neckline"
+        }
+      ],
+      "notes": "Shot in a kitchen; counters touch the skirt at waist height — check the cut-out at the counter line.",
+      "cutout_ok": true,
+      "cutout_review": "Accepted. Hem, train and gold beading intact; counter line removed cleanly. A small yellow tag at the form neck is part of the original photograph.",
+      "showcase_rank": 3
+    },
+    {
+      "file": "dress2.jpg",
+      "category": "gowns/evening-gowns",
+      "title": "Fuchsia Pearl Sweetheart Gown",
+      "visible": "Strapless fuchsia gown on a dress form with a corseted, seamed bodice, pearl clusters along the neckline and waist, and a sheer flowing overskirt with a train.",
+      "remove_background": true,
+      "publish": true,
+      "showcase": "signature",
+      "details": [],
+      "notes": "Sheer overskirt: verify transparency is kept rather than filled or clipped.",
+      "cutout_ok": true,
+      "cutout_review": "Accepted. Pearl trim and the ruffled hem edge intact. The sheer overskirt is kept as fabric.",
+      "showcase_rank": 5
+    },
+    {
+      "file": "dress3.jpg",
+      "category": "gowns/evening-gowns",
+      "title": "Ivory Pearl Drape Gown",
+      "visible": "Strapless ivory gown on a dress form with a diagonal draped panel across the bodice, pearl clusters at the neckline and waist, and a long skirt with a train.",
+      "remove_background": true,
+      "publish": true,
+      "showcase": "signature",
+      "details": [],
+      "notes": "White gown: could suit bridal or debut wear, but the photograph does not say so — left as an evening gown. Lower resolution (1080×1550) screenshot with a slight dark border.",
+      "cutout_ok": true,
+      "cutout_review": "Accepted. Draped panel and pearl clusters intact; the screenshot border did not carry over.",
+      "showcase_rank": 6
+    },
+    {
+      "file": "dress4.jpg",
+      "category": "menswear/pageant-formalwear",
+      "title": "Crimson Wing Formal Set",
+      "visible": "Red satin long-sleeved top with a stand collar, crystal drops down the front, a sequined tulle panel sweeping across the body like a wing, and matching trousers.",
+      "remove_background": true,
+      "publish": true,
+      "showcase": null,
+      "details": [],
+      "people": "Worn by a young pageant participant backstage (contestant rosette visible). May be a minor — confirm the family's consent before publishing widely.",
+      "notes": "Cropped below the knee in the original, so it is presented as a half-length portrait.",
+      "cutout_ok": true,
+      "cutout_review": "Accepted. Sequined wing panel and drops intact; the contestant rosette is pinned to the outfit and was kept."
+    },
+    {
+      "file": "dress5.jpg",
+      "category": "menswear/pageant-formalwear",
+      "title": "Verdant Embroidered Formal Set",
+      "visible": "Green satin long-sleeved top with gold and green floral embroidery, sequins and stones, a beaded fringe across the front, matching trousers, and a woven hat carried in hand.",
+      "remove_background": true,
+      "publish": true,
+      "showcase": null,
+      "details": [],
+      "people": "Worn by a young pageant participant backstage. May be a minor — confirm consent before publishing widely.",
+      "notes": "Heritage-inspired details, but no specific regional or national costume is claimed.",
+      "cutout_ok": true,
+      "cutout_review": "Accepted. Embroidery, fringe and the woven hat intact."
+    },
+    {
+      "file": "dress6.jpg",
+      "category": "gowns/pageant-gowns",
+      "title": "Rose Bodice Pageant Gown",
+      "visible": "Red gown with a bodice of sculpted fabric roses, one structured shoulder with beaded fringe, a beaded column skirt with a front slit, layered tulle train, and red lace gloves.",
+      "remove_background": true,
+      "publish": true,
+      "showcase": null,
+      "details": [],
+      "people": "Worn by a young pageant contestant (rosette visible). May be a minor — confirm consent before publishing widely.",
+      "notes": "Cropped at the knee in the original.",
+      "cutout_ok": true,
+      "cutout_review": "Accepted. Rose bodice, fringe, gloves and tulle train intact."
+    },
+    {
+      "file": "dress7.jpg",
+      "category": "costumes",
+      "title": "Heritage Pageant Costume",
+      "visible": "Heavily trimmed jacket and front panel in gold, rust and cream woven bands with large red stones, beaded chains and a matching headband.",
+      "remove_background": true,
+      "publish": false,
+      "showcase": null,
+      "details": [],
+      "people": "Official portrait from a school event (Hari at Reyna ng Wika at Kasaysayan 2026, Liceo de Pakil) with the student's full name and grade printed on it. Not published: needs the student's and school's consent. The cut-out removes the printed name and logos, but the face remains.",
+      "notes": "Heritage-themed pageant costume; no specific ethnic attribution is made.",
+      "cutout_ok": true,
+      "cutout_review": "Usable but imperfect: the bamboo pole held in the original was removed as background, leaving the hand closed around nothing. Not published."
+    },
+    {
+      "file": "dress8.jpg",
+      "category": "costumes",
+      "title": "Sunburst Headdress Costume",
+      "visible": "Beaded green and gold bodysuit-style costume with wooden-bead and crystal fringes, a sheer embellished lower section, a velvet side panel, and a large sunburst headdress with red stones.",
+      "remove_background": true,
+      "publish": true,
+      "showcase": null,
+      "details": [],
+      "notes": "Background is a composited green blur; the headdress edges need checking. Cropped at the thigh.",
+      "cutout_ok": true,
+      "cutout_review": "Accepted. Headdress points, stones and bead fringes intact against the composited background."
+    },
+    {
+      "file": "dress9.jpg",
+      "category": "gowns/evening-gowns",
+      "title": "Ember Beaded Gown",
+      "visible": "Orange and red gown with capped shoulders, a bodice and hip panel of overlapping beaded teardrop motifs, a midriff cut-out with bead drops, and a sheer crystal-scattered skirt with a high slit.",
+      "remove_background": true,
+      "publish": true,
+      "showcase": "signature",
+      "details": [
+        {
+          "x": 570,
+          "y": 420,
+          "w": 560,
+          "h": 600,
+          "caption": "Overlapping beaded teardrop motifs"
+        }
+      ],
+      "notes": "Already on a white studio backdrop. Similar framing to dress10 (same model and studio) but a different gown — not a duplicate.",
+      "cutout_ok": true,
+      "cutout_review": "Accepted. Sheer beaded skirt and bead drops intact.",
+      "showcase_rank": 4
+    },
+    {
+      "file": "dress10.jpg",
+      "category": "gowns/evening-gowns",
+      "title": "Gilded Fringe Gown",
+      "visible": "Gold gown with a wide folded off-shoulder neckline edged in crystals and beaded fringe, gold appliqué at the bust, and a fitted sequined skirt flaring at the hem.",
+      "remove_background": true,
+      "publish": true,
+      "showcase": "signature",
+      "details": [],
+      "notes": "Low resolution (768×960) — shown at modest sizes. Similar framing to dress9 but a different gown.",
+      "cutout_ok": true,
+      "cutout_review": "Accepted. Beaded fringe at the neckline intact; low source resolution.",
+      "showcase_rank": 2
+    },
+    {
+      "file": "dress11.jpg",
+      "category": "gowns/evening-gowns",
+      "title": "Red Sunburst Gown",
+      "visible": "Red gown on a dress form with a high fan of pleated, glittered tulle at the neckline, voluminous puff sleeves, a beaded and sequined sunburst radiating from the waist, and a sweeping overskirt train.",
+      "remove_background": true,
+      "publish": true,
+      "showcase": "masterpiece",
+      "details": [
+        {
+          "x": 570,
+          "y": 600,
+          "w": 420,
+          "h": 780,
+          "caption": "Sequined sunburst radiating from the waist"
+        }
+      ],
+      "notes": "Strongest silhouette and handwork in the set. Train runs off the bottom edge of the photograph.",
+      "cutout_ok": true,
+      "cutout_review": "Accepted. Pleated tulle fan, puff sleeves and the overskirt train intact; dress form kept.",
+      "showcase_rank": 0
+    },
+    {
+      "file": "dress12.jpg",
+      "category": "gowns/evening-gowns",
+      "title": "Fuchsia Sculpted Drape Gown",
+      "visible": "Fuchsia one-shoulder gown with a sculpted pleated drape wrapping the bodice and hip, crystal bead fringe, a radiating beaded panel, a large crystal brooch, and a glittered overskirt.",
+      "remove_background": true,
+      "publish": true,
+      "showcase": "signature",
+      "details": [
+        {
+          "x": 600,
+          "y": 560,
+          "w": 440,
+          "h": 560,
+          "caption": "Crystal brooch and radiating beadwork"
+        }
+      ],
+      "notes": "Second showpiece. Busy room behind; stair edge touches the skirt on the right.",
+      "cutout_ok": true,
+      "cutout_review": "Accepted. Crystal fringe and brooch intact; the stair edge was removed.",
+      "showcase_rank": 1
+    },
+    {
+      "file": "logo.jpg",
+      "category": "brand",
+      "title": "Tailored by Kyla logo",
+      "visible": "White TK monogram and script wordmark on black.",
+      "remove_background": false,
+      "publish": false,
+      "showcase": null,
+      "details": [],
+      "notes": "Brand asset, not clothing. Used by `npm run brand:assets`."
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Photo library · Studio{% endblock %}
+
+{% block main %}
+<header class="s-head">
+  <div><p class="note">Assets</p><h1>Photo library</h1></div>
+</header>
+<nav class="s-tabs" aria-label="Library category">
+  <a href="/studio/library" {% if not filters.category and not filters.unused %}aria-current="true"{% endif %}>Everything</a>
+  {% for c in categories %}
+  <a href="/studio/library?category={{ c.category | urlencode }}" {% if filters.category == c.category %}aria-current="true"{% endif %}>{{ c.label }}<span class="note">{{ c.n }}</span></a>
+  {% endfor %}
+  <a href="/studio/library?unused=1" {% if filters.unused %}aria-current="true"{% endif %}>Not in a listing yet</a>
+</nav>
+
+<div class="s-body">
+  <p class="small muted" style="max-width: 62ch">Every photograph prepared for the website: those organised from the <code>assets</code> folder and those you upload. Each is kept as the original, a transparent cut-out and a <strong>studio</strong> version on the shared ivory canvas. The files in <code>assets/originals</code> are never changed.</p>
+
+  <form class="upload s-card" method="post" action="/studio/library/upload" enctype="multipart/form-data" data-busy>
+    {{ m.csrf() }}
+    <h2>Add photographs</h2>
+    <div class="inline-form">
+      <div class="field">
+        <label for="lib-photos">Photographs</label>
+        <input id="lib-photos" type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/avif" multiple required data-preview="lib-previews">
+      </div>
+      <div class="field">
+        <label for="lib-cat">What they show</label>
+        <select class="select" id="lib-cat" name="category">
+          {% for k, l in CATEGORY_LABELS %}<option value="{{ k }}" {% if k == (filters.category or 'unclassified') %}selected{% endif %}>{{ l }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="lib-kind">Type</label>
+        <select class="select" id="lib-kind" name="kind">
+          {% for k, l in KINDS %}<option value="{{ k }}">{{ l }}</option>{% endfor %}
+        </select>
+      </div>
+      <button class="btn btn--small" type="submit">Upload</button>
+    </div>
+    {% if canRemoveBg %}
+    <label class="check"><input type="checkbox" name="remove_bg" value="1" checked> Remove the background and place on the studio canvas (about a minute per photograph)</label>
+    {% else %}
+    <p class="warn small">Background removal isn’t set up on this server (README → “Background removal”), so new uploads stay as original photographs until it is.</p>
+    {% endif %}
+    <div class="upload__previews" id="lib-previews"></div>
+    <span class="hint">Up to 12 at a time, {{ uploadMaxMb }} MB each. Identical files are only stored once. Check every cut-out against its original before using it.</span>
+    <span class="busy-note">Uploading{% if canRemoveBg %} and removing backgrounds{% endif %} — please keep this page open…</span>
+  </form>
+
+  {% if items.length %}
+  <form id="use-form" method="post" action="/studio/library/use">{{ m.csrf() }}</form>
+  <ul class="lib" role="list">
+    {% for it in items %}
+    <li class="lib__item" id="lib-{{ it.id }}">
+      <label class="lib__pick">
+        <input type="checkbox" name="ids" value="{{ it.id }}" form="use-form">
+        <span class="lib__thumb {% if it.has_studio %}is-studio{% endif %}"><img src="{{ it.thumb }}" alt="{{ it.title or 'Photograph' }}" loading="lazy" decoding="async"></span>
+      </label>
+      <div class="lib__meta">
+        <span class="lib__title">{{ it.title or 'Untitled' }}</span>
+        <span class="note">{{ it.label }} · {{ KINDS[it.kind] }}</span>
+        <span class="lib__flags">
+          {% if it.has_studio %}<span class="status status--ok">Studio</span>{% elif it.has_cutout %}<span class="status status--pending">Cut-out</span>{% elif it.kind == 'detail' %}<span class="status status--neutral">Close-up</span>{% else %}<span class="status status--neutral">Original only</span>{% endif %}
+          {% if it.source == 'manifest' %}<span class="status status--neutral">Assets folder</span>{% endif %}
+        </span>
+        {% if it.usedBy.length %}
+        <span class="small">In {% for u in it.usedBy %}<a href="/studio/gowns/{{ u.id }}">{{ u.name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</span>
+        {% else %}<span class="small muted">Not in a listing</span>{% endif %}
+      </div>
+      <details class="lib__more">
+        <summary class="link-plain small">Compare &amp; edit</summary>
+        <div class="photo__compare lib__compare">
+          <figure><img src="{{ it.frame }}" alt="" loading="lazy"><figcaption>Original</figcaption></figure>
+          {% if it.cutout %}<figure class="cut-preview"><img src="{{ it.cutout }}" alt="" loading="lazy"><figcaption>Cut-out</figcaption></figure>{% endif %}
+          {% if it.studio %}<figure><img src="{{ it.studio }}" alt="" loading="lazy"><figcaption>Studio canvas</figcaption></figure>{% endif %}
+        </div>
+        {% if it.notes %}<p class="small muted">{{ it.notes }}</p>{% endif %}
+        <form method="post" action="/studio/library/{{ it.id }}" class="boxed lib__edit">
+          {{ m.csrf() }}
+          <div class="field"><label for="lt-{{ it.id }}">Name</label><input class="input" id="lt-{{ it.id }}" name="title" value="{{ it.title }}" maxlength="120"></div>
+          <div class="field"><label for="lc-{{ it.id }}">Caption</label><input class="input" id="lc-{{ it.id }}" name="caption" value="{{ it.caption }}" maxlength="300"></div>
+          <div class="row">
+            <div class="field"><label for="lg-{{ it.id }}">Shows</label>
+              <select class="select" id="lg-{{ it.id }}" name="category">{% for k, l in CATEGORY_LABELS %}<option value="{{ k }}" {% if it.category == k %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+            <div class="field"><label for="lk-{{ it.id }}">Type</label>
+              <select class="select" id="lk-{{ it.id }}" name="kind">{% for k, l in KINDS %}<option value="{{ k }}" {% if it.kind == k %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+          </div>
+          <button class="btn btn--small btn--ghost" type="submit">Save</button>
+        </form>
+        <div class="photo__tools">
+          {% if canRemoveBg %}
+          <form method="post" action="/studio/library/{{ it.id }}/cutout" data-busy>{{ m.csrf() }}<button class="{{ 'link-plain small' if it.has_cutout else 'btn btn--small' }}" type="submit">{{ 'Redo background removal' if it.has_cutout else 'Remove background' }}</button><span class="busy-note">Removing background — this can take a minute…</span></form>
+          {% endif %}
+          {% if not it.usedBy.length %}
+          <form method="post" action="/studio/library/{{ it.id }}/delete" data-confirm="Remove this photograph from the library?" style="margin-left: auto">{{ m.csrf() }}<button class="link-plain small" type="submit">Remove from library</button></form>
+          {% endif %}
+        </div>
+      </details>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <div class="lib__bar s-actions">
+    <span class="small">With the ticked photographs:</span>
+    <button class="btn btn--small" type="submit" form="use-form" name="action" value="new">Start a new draft listing</button>
+    <span class="small muted">or</span>
+    <label class="visually-hidden" for="use-gown">Listing</label>
+    <select class="select" id="use-gown" name="gown_id" form="use-form">
+      <option value="">Choose a listing…</option>
+      {% for g in listings %}<option value="{{ g.id }}">{{ g.name }}{% if g.listing_status != 'published' %} ({{ status.LISTING[g.listing_status] | lower }}){% endif %}</option>{% endfor %}
+    </select>
+    <button class="btn btn--small btn--ghost" type="submit" form="use-form" name="action" value="attach">Add to listing</button>
+  </div>
+  {% else %}
+  <p class="empty">{% if filters.category or filters.unused %}Nothing here. <a href="/studio/library">See every photograph</a>.{% else %}The library is empty. Run <code>npm run assets:organize</code> and <code>npm run assets:import</code>, or upload photographs above.{% endif %}</p>
+  {% endif %}
+</div>
+{% endblock %}

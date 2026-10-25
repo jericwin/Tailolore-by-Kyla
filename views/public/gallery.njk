@@ -1,0 +1,49 @@
+{% extends "layouts/site.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Gallery · {{ site.brand_name }}{% endblock %}
+{% block scripts %}<script src="/static/js/lightbox.js?v={{ assetVersion }}" defer></script>{% endblock %}
+
+{% macro galleryLink(filters, label, category, kind) -%}
+<a href="{{ href('/gallery', {}, { category: category, kind: kind }) }}" {% if filters.category == category and filters.kind == kind %}aria-current="true"{% endif %}>{{ label }}</a>
+{%- endmacro %}
+
+{% block main %}
+<header class="page-head">
+  <p class="note">§ 02</p>
+  <h1><em>Gallery</em></h1>
+  <p class="page-head__aside">Every photograph in the collection{% if hasDetails %}, including close-ups of the handwork{% endif %}. Select any image to view it full screen.</p>
+</header>
+
+<nav class="filters" aria-label="Filter photographs">
+  <div class="filters__group">
+    <span class="note">Show</span>
+    {{ galleryLink(filters, 'Everything', '', '') }}
+    {% for c in categories %}{{ galleryLink(filters, c.name, c.slug, '') }}{% endfor %}
+    {% if hasDetails %}{{ galleryLink(filters, 'Details only', filters.category, 'detail') }}{% endif %}
+  </div>
+  <span class="filters__count note">{{ images.length }} photograph{% if images.length != 1 %}s{% endif %}</span>
+</nav>
+
+{% if images.length %}
+<div class="gallery">
+  {% for img in images %}
+  <figure class="gallery__item reveal">
+    <button type="button" data-lightbox="gallery" data-src="{{ imgSrc(img.file_key, 2400) }}" data-srcset="{{ img.frameSrcset }}"
+      data-alt="{{ img.alt or img.gown_name }}" data-caption="{{ img.caption or img.gown_name }}" data-href="/gowns/{{ img.gown_slug }}"
+      aria-label="View {{ img.caption or img.gown_name }} full screen">
+      {{ m.plate(img, sizes='(min-width: 1100px) 30vw, (min-width: 640px) 46vw, 92vw', alt=img.gown_name) }}
+    </button>
+    <figcaption class="gallery__cap">
+      <a class="note" href="/gowns/{{ img.gown_slug }}">{{ img.caption or img.gown_name }}</a>
+      {% if img.kind == 'detail' %}<span class="note">Detail</span>{% endif %}
+    </figcaption>
+  </figure>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <p class="lede">Photographs will appear here as gowns are added to the collection.</p>
+  {% if site.facebook_url %}<a class="link" href="{{ site.facebook_url }}" rel="noopener" target="_blank">Recent pieces on Facebook <span class="arrow">↗</span></a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

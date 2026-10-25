@@ -1,0 +1,315 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}{{ gown.name if gown else 'New gown' }} · Studio{% endblock %}
+
+{% block main %}
+<header class="s-head">
+  <div>
+    <p class="note"><a href="/studio/gowns">Gowns</a>{% if gown %} / <span class="status status--{{ { published: 'ok', draft: 'pending', unpublished: 'neutral', archived: 'closed' }[gown.listing_status] }}">{{ status.LISTING[gown.listing_status] }}</span>{% endif %}</p>
+    <h1>{% if gown %}{{ gown.name }}{% else %}New <em>gown</em>{% endif %}</h1>
+  </div>
+  {% if gown %}
+  <div class="s-head__actions">
+    <a class="btn btn--ghost btn--small" href="/studio/gowns/{{ gown.id }}/preview" target="_blank" rel="noopener">Preview ↗</a>
+    {% if gown.listing_status == 'published' %}
+      <a class="link" href="/gowns/{{ gown.slug }}" target="_blank" rel="noopener">On the website ↗</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</header>
+
+<div class="s-body">
+  <div class="s-grid s-grid--main">
+    <div>
+      {% if errors | length %}<p class="form-error" role="alert">Please check the highlighted fields.</p>{% endif %}
+      <form method="post" action="{{ '/studio/gowns/' + gown.id if gown else '/studio/gowns/new' }}" class="s-form boxed">
+        {{ m.csrf() }}
+        {% if gown %}<input type="hidden" name="version" value="{{ gown.version }}">{% endif %}
+
+        <fieldset>
+          <legend>The gown</legend>
+          {{ m.box('name', 'Name', values, errors, attrs='required maxlength="120"') }}
+          <div class="row">
+            <div class="field">
+              <label for="f-category_id">Category</label>
+              <select class="select" id="f-category_id" name="category_id">
+                <option value="">— None —</option>
+                {% for c in categories %}<option value="{{ c.id }}" {% if values.category_id == c.id or values.category_id == (c.id | string) %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+              </select>
+              <span class="hint"><a href="/studio/categories">Manage categories</a></span>
+            </div>
+            {{ m.box('color', 'Colour', values, errors, attrs='maxlength="120"') }}
+          </div>
+          {{ m.box('description', 'Description', values, errors, type='textarea', hint='Shown on the gown’s page. Write it the way you would describe it to a client.', attrs='rows="5" maxlength="4000"') }}
+          {{ m.box('design_details', 'Design details', values, errors, type='textarea', hint='Fabric, lace, beadwork, neckline, train…', attrs='rows="3" maxlength="2000"') }}
+        </fieldset>
+
+        <fieldset>
+          <legend>How it can be worn</legend>
+          <label class="check"><input type="checkbox" name="offer_rental" value="1" {% if values.offer_rental == 1 or values.offer_rental == '1' %}checked{% endif %}> Available to rent</label>
+          <div class="row" data-show-when="offer_rental=1">
+            {{ m.box('rental_price', 'Rental price (₱)', values, errors, attrs='inputmode="decimal"') }}
+            {{ m.box('rental_period_days', 'Rental period (days)', values, errors, type='number', hint='Longest pickup-to-return span the price covers.', attrs='min="1" max="60"') }}
+            {{ m.box('security_deposit', 'Security deposit (₱)', values, errors, hint='Leave empty if none.', attrs='inputmode="decimal"') }}
+          </div>
+          <label class="check"><input type="checkbox" name="offer_purchase" value="1" {% if values.offer_purchase == 1 or values.offer_purchase == '1' %}checked{% endif %}> Available to buy</label>
+          <div class="row" data-show-when="offer_purchase=1">
+            {{ m.box('purchase_price', 'Price (₱)', values, errors, attrs='inputmode="decimal"') }}
+          </div>
+          <label class="check"><input type="checkbox" name="offer_custom" value="1" {% if values.offer_custom == 1 or values.offer_custom == '1' %}checked{% endif %}> Customers may request a made-to-order version</label>
+          {% if errors.rental_price or errors.purchase_price %}<p class="error small">{{ errors.rental_price or errors.purchase_price }}</p>{% endif %}
+        </fieldset>
+
+        <fieldset>
+          <legend>Sizes &amp; measurements</legend>
+          {{ m.box('sizes', 'Sizes', values, errors, hint='Separate with commas, e.g. “S, M” or “Fits bust 32–34 in”. Customers choose from this list.', attrs='maxlength="200"') }}
+          <div class="row">
+            {{ m.box('m_bust', 'Bust', values, errors, attrs='maxlength="40"') }}
+            {{ m.box('m_waist', 'Waist', values, errors, attrs='maxlength="40"') }}
+            {{ m.box('m_hips', 'Hips', values, errors, attrs='maxlength="40"') }}
+            {{ m.box('m_length', 'Length', values, errors, attrs='maxlength="40"') }}
+          </div>
+          {{ m.box('m_notes', 'Measurement notes', values, errors, hint='Include units (in / cm). Only filled-in measurements are shown.', attrs='maxlength="400"') }}
+        </fieldset>
+
+        <fieldset>
+          <legend>Care &amp; terms</legend>
+          {{ m.box('care_instructions', 'Care instructions', values, errors, type='textarea', attrs='rows="3" maxlength="2000"') }}
+          {{ m.box('terms', 'Terms for this gown', values, errors, type='textarea', hint='Shown with your general terms from Settings. Customers must tick that they have read them.', attrs='rows="3" maxlength="4000"') }}
+        </fieldset>
+
+        <fieldset>
+          <legend>Placement</legend>
+          <label class="check"><input type="checkbox" name="featured" value="1" {% if values.featured == 1 or values.featured == '1' %}checked{% endif %}> Feature first in the collection</label>
+          <p class="hint">The homepage showcase is chosen separately — see “Homepage” beside this form{% if not gown %} once the draft is saved{% endif %}.</p>
+          <div class="row">
+            {{ m.box('sort_order', 'Order', values, errors, type='number', hint='Lower numbers appear first.', attrs='min="-9999" max="9999"') }}
+            {% if not gown %}{{ m.box('units', 'Number of pieces', values, errors, type='number', hint='How many physical gowns of this design you have. Each can be rented separately.', attrs='min="1" max="20"') }}{% endif %}
+          </div>
+        </fieldset>
+
+        <div class="s-sticky-save s-actions">
+          <button class="btn" type="submit">{{ 'Save changes' if gown else 'Save draft' }}</button>
+          {% if gown %}<span class="note">Last saved {{ gown.updated_at | stamp }}</span>{% endif %}
+        </div>
+      </form>
+
+      {% if gown %}
+      <section class="s-section" id="photographs" style="margin-top: 3rem">
+        <h2>Photographs <span class="note">{{ gown.images.length }}</span></h2>
+        <form class="upload" method="post" action="/studio/gowns/{{ gown.id }}/photos" enctype="multipart/form-data" data-busy>
+          {{ m.csrf() }}
+          <div class="inline-form">
+            <div class="field">
+              <label for="up-photos" class="label">Add photographs</label>
+              <input id="up-photos" type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/avif" multiple required data-preview="up-previews">
+            </div>
+            <div class="field">
+              <label for="up-kind">Type</label>
+              <select class="select" id="up-kind" name="kind" style="border: 1px solid var(--rule); padding-left: .6rem">
+                <option value="look">Full look</option><option value="detail">Detail / close-up</option><option value="atelier">Atelier / process</option>
+              </select>
+            </div>
+            <button class="btn btn--small" type="submit">Upload</button>
+          </div>
+          <div class="upload__previews" id="up-previews"></div>
+          <span class="hint">Up to 8 at a time, {{ uploadMaxMb }} MB each. Photos are resized and stripped of location data automatically; your originals are kept for background removal.</span>
+          <span class="busy-note">Uploading and preparing sizes…</span>
+        </form>
+        <p class="small" style="margin: .8rem 0 0">Or <a href="/studio/library">choose from the photo library</a> ({{ libraryCount }} photograph{% if libraryCount != 1 %}s{% endif %}) — tick photographs there and add them to “{{ gown.name }}”.</p>
+
+        {% if gown.images.length %}
+        <div class="photos">
+          {% for img in gown.images %}
+          <article class="photo {% if img.is_main %}is-main{% endif %}" id="photo-{{ img.id }}">
+            <div class="photo__compare {% if img.has_cutout %}has-cut{% endif %}">
+              <figure><img src="{{ img.frameSrc }}" alt="" loading="lazy"><figcaption>Original</figcaption></figure>
+              {% if img.has_studio %}<figure><img src="{{ img.studioSrc }}" alt="" loading="lazy"><figcaption>Studio canvas</figcaption></figure>
+              {% elif img.has_cutout %}<figure class="cut-preview"><img src="{{ img.cutSrc }}" alt="" loading="lazy"><figcaption>Cut-out</figcaption></figure>{% endif %}
+            </div>
+            <form method="post" action="/studio/gowns/{{ gown.id }}/photos/{{ img.id }}" class="photo__body boxed">
+              {{ m.csrf() }}
+              <p class="note">{% if img.is_main %}<span class="status status--ok">Main photograph</span>{% else %}Photograph {{ loop.index }}{% endif %} · {{ img.width }}×{{ img.height }}</p>
+              <div class="field"><label for="alt-{{ img.id }}">Description (for screen readers)</label><input class="input" id="alt-{{ img.id }}" name="alt" value="{{ img.alt }}" maxlength="300"></div>
+              <div class="field"><label for="cap-{{ img.id }}">Caption</label><input class="input" id="cap-{{ img.id }}" name="caption" value="{{ img.caption }}" maxlength="300"></div>
+              <div class="row">
+                <div class="field"><label for="kind-{{ img.id }}">Type</label>
+                  <select class="select" id="kind-{{ img.id }}" name="kind">
+                    {% for k, l in { look: 'Full look', detail: 'Detail', atelier: 'Atelier' } %}<option value="{{ k }}" {% if img.kind == k %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                  </select></div>
+                <div class="field"><label for="ord-{{ img.id }}">Order</label><input class="input" id="ord-{{ img.id }}" name="sort_order" type="number" min="0" max="999" value="{{ img.sort_order }}"></div>
+              </div>
+              {% if img.has_cutout %}
+              <fieldset style="margin: 0">
+                <legend class="label" style="font: 500 .68rem/1.3 var(--sans); letter-spacing: .16em; text-transform: uppercase; margin-bottom: .5rem">Show on the website as</legend>
+                {% if img.has_studio %}<label class="check"><input type="radio" name="presentation" value="studio" {% if img.presentation == 'studio' %}checked{% endif %}> Studio canvas (the house look, same as the rest of the collection)</label>{% endif %}
+                <label class="check"><input type="radio" name="presentation" value="frame" {% if img.presentation == 'frame' %}checked{% endif %}> Full frame (original setting)</label>
+                <label class="check"><input type="radio" name="presentation" value="cutout" {% if img.presentation == 'cutout' %}checked{% endif %}> Cut-out on a backdrop</label>
+              </fieldset>
+              <div class="field">
+                <span class="label">Backdrop</span>
+                <div class="swatches">
+                  {% for b in BACKDROPS %}
+                  <label title="{{ b | capitalize }}"><input type="radio" name="backdrop" value="{{ b }}" {% if img.backdrop == b %}checked{% endif %}><span class="bd-{{ b }}"></span><span class="visually-hidden">{{ b }}</span></label>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+              {% if not img.is_main %}<label class="check"><input type="checkbox" name="is_main" value="1"> Make this the main photograph</label>{% endif %}
+              <button class="btn btn--small btn--ghost" type="submit">Save photograph</button>
+            </form>
+            <div class="photo__tools">
+              {% if canRemoveBg %}
+                {% if img.has_cutout %}
+                <form method="post" action="/studio/gowns/{{ gown.id }}/photos/{{ img.id }}/cutout/remove">{{ m.csrf() }}<button class="link-plain small" type="submit">Discard cut-out</button></form>
+                <form method="post" action="/studio/gowns/{{ gown.id }}/photos/{{ img.id }}/cutout" data-busy>{{ m.csrf() }}<button class="link-plain small" type="submit">Redo cut-out</button><span class="busy-note">Removing background — this can take a minute…</span></form>
+                {% else %}
+                <form method="post" action="/studio/gowns/{{ gown.id }}/photos/{{ img.id }}/cutout" data-busy>{{ m.csrf() }}<button class="btn btn--small" type="submit">Remove background</button><span class="busy-note">Removing background — this can take a minute…</span></form>
+                {% endif %}
+              {% endif %}
+              <form method="post" action="/studio/gowns/{{ gown.id }}/photos/{{ img.id }}/delete" data-confirm="Remove this photograph?" style="margin-left: auto">{{ m.csrf() }}<button class="link-plain small" type="submit">Remove</button></form>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+        {% if not canRemoveBg %}<p class="small muted" style="margin-top: 1rem">Background removal isn’t set up on this server yet (see README → “Background removal”). Photographs are shown full frame.</p>{% endif %}
+        {% endif %}
+      </section>
+
+      <section class="s-section" id="availability">
+        <h2>Pieces &amp; availability</h2>
+        <div class="s-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))">
+          <div class="s-card">
+            <h3>Physical pieces</h3>
+            <p class="small muted">Each approved rental is assigned to a piece, so the same piece is never booked twice.</p>
+            <ul class="calendar-list">
+              {% for u in units %}
+              <li>
+                <form method="post" action="/studio/gowns/{{ gown.id }}/units/{{ u.id }}" class="inline-form boxed" style="grid-column: 1 / -1">
+                  {{ m.csrf() }}
+                  <label class="visually-hidden" for="ul-{{ u.id }}">Label</label><input class="input" id="ul-{{ u.id }}" name="label" value="{{ u.label }}" style="width: 8rem" maxlength="60">
+                  <label class="visually-hidden" for="us-{{ u.id }}">Size</label><input class="input" id="us-{{ u.id }}" name="size" value="{{ u.size }}" placeholder="Size" style="width: 5rem" maxlength="40">
+                  {% if u.status == 'reserved_sale' %}<span class="status status--pending">Reserved for sale</span>
+                  {% else %}
+                  <label class="visually-hidden" for="ust-{{ u.id }}">Status</label>
+                  <select class="select" id="ust-{{ u.id }}" name="status" style="width: 7.5rem">
+                    {% for k, l in { active: 'In service', sold: 'Sold', retired: 'Retired' } %}<option value="{{ k }}" {% if u.status == k %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                  </select>
+                  {% endif %}
+                  <button class="link-plain small" type="submit">Save</button>
+                  {% if u.holds %}<span class="note">{{ u.holds }} booking{% if u.holds > 1 %}s{% endif %}</span>{% endif %}
+                </form>
+              </li>
+              {% endfor %}
+            </ul>
+            <form method="post" action="/studio/gowns/{{ gown.id }}/units" class="inline-form boxed" style="margin-top: 1rem">
+              {{ m.csrf() }}
+              <label class="visually-hidden" for="nu-label">New piece label</label><input class="input" id="nu-label" name="label" placeholder="Piece {{ units.length + 1 }}" value="Piece {{ units.length + 1 }}" style="width: 8rem" required maxlength="60">
+              <label class="visually-hidden" for="nu-size">Size</label><input class="input" id="nu-size" name="size" placeholder="Size" style="width: 5rem" maxlength="40">
+              <button class="btn btn--ghost btn--small" type="submit">Add piece</button>
+            </form>
+          </div>
+
+          <div class="s-card">
+            <h3>Block dates</h3>
+            <p class="small muted">Fittings, repairs, or days you’re away. Customers can’t request blocked dates.</p>
+            <form method="post" action="/studio/gowns/{{ gown.id }}/blocks" class="inline-form boxed">
+              {{ m.csrf() }}
+              <div class="field"><label for="b-from">From</label><input class="input" id="b-from" type="date" name="start_date" required></div>
+              <div class="field"><label for="b-to">To</label><input class="input" id="b-to" type="date" name="end_date" required></div>
+              {% if units.length > 1 %}
+              <div class="field"><label for="b-unit">Piece</label><select class="select" id="b-unit" name="unit_id"><option value="">All</option>{% for u in units %}<option value="{{ u.id }}">{{ u.label }}</option>{% endfor %}</select></div>
+              {% endif %}
+              <div class="field"><label for="b-reason">Reason</label><input class="input" id="b-reason" name="reason" maxlength="200" placeholder="Optional"></div>
+              <button class="btn btn--ghost btn--small" type="submit">Block</button>
+            </form>
+            {% if blocks.length %}
+            <ul class="calendar-list" style="margin-top: 1rem">
+              {% for b in blocks %}
+              <li><span class="note">{{ b.start_date | date('short') }}–{{ b.end_date | date('short') }}</span><span class="small">{{ b.reason or 'Blocked' }}{% if b.unit_label %} · {{ b.unit_label }}{% endif %}</span>
+                <form method="post" action="/studio/gowns/{{ gown.id }}/blocks/{{ b.id }}/delete">{{ m.csrf() }}<button class="link-plain small" type="submit">Remove</button></form></li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="s-card" style="margin-top: 1.2rem">
+          <h3>Bookings &amp; requests for this gown</h3>
+          {% if bookings.length %}
+          <ul class="calendar-list">
+            {% for r in bookings %}
+            <li><span class="note">{{ r.pickup_date | date('short') }}–{{ r.return_date | date('short') }}</span>
+              <a href="/studio/rentals/{{ r.id }}">{{ r.customer }} <span class="note">{{ r.reference }}{% if r.unit_label %} · {{ r.unit_label }}{% endif %}</span></a>
+              {{ m.statusMark(status.RENTAL, r.status) }}</li>
+            {% endfor %}
+          </ul>
+          {% else %}<p class="empty" style="padding: 0">No open requests or bookings.</p>{% endif %}
+        </div>
+      </section>
+      {% endif %}
+    </div>
+
+    {% if gown %}
+    <aside>
+      <div class="s-card">
+        <h2>Listing</h2>
+        <div class="status-actions">
+          {% if gown.listing_status != 'published' %}
+          <form method="post" action="/studio/gowns/{{ gown.id }}/listing">{{ m.csrf() }}<input type="hidden" name="listing_status" value="published">
+            <button class="btn btn--block" type="submit">Publish</button></form>
+          <p class="small muted">Check the <a href="/studio/gowns/{{ gown.id }}/preview" target="_blank" rel="noopener">preview</a> first. Publishing needs at least one photograph.</p>
+          {% else %}
+          <form method="post" action="/studio/gowns/{{ gown.id }}/listing">{{ m.csrf() }}<input type="hidden" name="listing_status" value="unpublished">
+            <button class="btn btn--ghost btn--block" type="submit">Unpublish</button></form>
+          {% endif %}
+          {% if gown.listing_status != 'archived' %}
+          <form method="post" action="/studio/gowns/{{ gown.id }}/listing" data-confirm="Archive this gown? It will be hidden from the website; its records are kept.">{{ m.csrf() }}<input type="hidden" name="listing_status" value="archived">
+            <button class="link-plain small" type="submit">Archive</button></form>
+          {% else %}
+          <form method="post" action="/studio/gowns/{{ gown.id }}/listing">{{ m.csrf() }}<input type="hidden" name="listing_status" value="draft">
+            <button class="link-plain small" type="submit">Restore to drafts</button></form>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="s-card" id="homepage">
+        <h2>Homepage</h2>
+        <form method="post" action="/studio/gowns/{{ gown.id }}/showcase" class="status-actions boxed">
+          {{ m.csrf() }}
+          {% for k, l in { '': 'Not in the showcase', signature: 'Signature piece', masterpiece: 'The masterpiece (opens the site)' } %}
+          <label class="check"><input type="radio" name="role" value="{{ k }}" {% if (showcaseRole or '') == k %}checked{% endif %}> {{ l }}</label>
+          {% endfor %}
+          <button class="btn btn--ghost btn--small" type="submit">Update</button>
+          <p class="small muted" style="margin: 0">{% if gown.listing_status != 'published' %}Shown once the gown is published. {% endif %}Order, photograph and notes: <a href="/studio/showcase">Homepage showcase</a>.</p>
+        </form>
+      </div>
+
+      <div class="s-card">
+        <h2>Availability</h2>
+        <form method="post" action="/studio/gowns/{{ gown.id }}/availability" class="status-actions boxed">
+          {{ m.csrf() }}
+          <label class="visually-hidden" for="avail">Availability</label>
+          <select class="select" id="avail" name="availability_status">
+            {% for k, l in AVAILABILITY %}<option value="{{ k }}" {% if gown.availability_status == k %}selected{% endif %}>{{ l }}</option>{% endfor %}
+          </select>
+          <button class="btn btn--ghost btn--small" type="submit">Update</button>
+          <p class="small muted" style="margin: 0">Updated automatically when a gown is picked up, returned or sold. “Unavailable” and “Sold” stop new requests.</p>
+        </form>
+      </div>
+
+      <div class="s-card danger-zone" id="danger">
+        <h2>Delete</h2>
+        <p class="small">Deleting removes the listing and its photographs permanently. Gowns with rental or order history can only be archived.</p>
+        <form method="post" action="/studio/gowns/{{ gown.id }}/delete" class="status-actions boxed" data-confirm="Delete this gown permanently?">
+          {{ m.csrf() }}
+          <label for="confirm-name" class="small">Type <strong>{{ gown.name }}</strong> to confirm</label>
+          <input class="input" id="confirm-name" name="confirm_name" autocomplete="off">
+          <button class="btn btn--danger btn--small" type="submit">Delete gown</button>
+        </form>
+      </div>
+    </aside>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

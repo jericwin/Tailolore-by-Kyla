@@ -1,0 +1,23 @@
+{% extends "layouts/account.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}My purchases · {{ site.brand_name }}{% endblock %}
+
+{% block content %}
+<header class="acct__head"><p class="note">My purchases</p><h1 class="h1">Purchases</h1></header>
+{% if orders.length %}
+<ul class="ledger" role="list">
+  {% for o in orders %}
+  <li><a href="/account/orders/{{ o.id }}" class="ledger__row">
+    <span class="ledger__thumb">{% if o.thumb_key %}<img src="{{ imgSrc(o.thumb_key, 480) }}" alt="" loading="lazy">{% endif %}</span>
+    <span class="ledger__main">
+      <span class="ledger__title">{{ o.gown_name }}</span>
+      <span class="note">{{ o.reference }} · {{ o.quoted_price | money }} · {{ o.created_at | stamp }}</span>
+    </span>
+    {{ m.statusMark(status.ORDER, o.status) }}
+  </a></li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="acct__empty"><p class="lede">No purchases yet.</p><a class="link" href="/collection?service=buy">Gowns to buy <span class="arrow">→</span></a></div>
+{% endif %}
+{% endblock %}

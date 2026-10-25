@@ -1,0 +1,96 @@
+{% extends "layouts/account.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}{{ custom.reference }} · {{ site.brand_name }}{% endblock %}
+
+{% block content %}
+<header class="acct__head">
+  <p class="note"><a href="/account/custom">Custom orders</a> / {{ custom.reference }}</p>
+  <h1 class="h1">{{ custom.event_type }}</h1>
+  <p>{{ m.statusMark(status.CUSTOM, custom.status) }}</p>
+  {{ m.progress('custom', custom.status) }}
+  <p class="acct__explain">{{ status.CUSTOM[custom.status].note }}</p>
+</header>
+
+<div class="record">
+  <div class="record__main">
+    {% if quotations.length %}
+    <section class="quotes" aria-labelledby="q-h">
+      <h2 class="eyebrow" id="q-h">Quotation{% if quotations.length > 1 %}s{% endif %}</h2>
+      {% for q in quotations %}
+      <article class="quote-card {% if q.status == 'sent' %}is-open{% endif %}">
+        <div class="quote-card__head">
+          <span class="price__main">{{ q.amount | money }}</span>
+          <span class="status status--{{ 'action' if q.status == 'sent' else ('ok' if q.status == 'accepted' else 'closed') }}">{{ { sent: 'Awaiting your answer', accepted: 'Accepted', declined: 'Declined', superseded: 'Replaced by a newer quotation', withdrawn: 'Withdrawn' }[q.status] }}</span>
+        </div>
+        <div class="quote-card__body">{{ q.details | nl2p }}</div>
+        <dl class="facts facts--compact">
+          {% if q.downpayment %}<div><dt>Downpayment</dt><dd>{{ q.downpayment | money }}</dd></div>{% endif %}
+          {% if q.proposed_deadline %}<div><dt>Ready by</dt><dd>{{ q.proposed_deadline | date }}</dd></div>{% endif %}
+          {% if q.valid_until %}<div><dt>Valid until</dt><dd>{{ q.valid_until | date }}</dd></div>{% endif %}
+          <div><dt>Sent</dt><dd>{{ q.created_at | stamp }}</dd></div>
+        </dl>
+        {% if q.customer_response %}<p class="small"><span class="note">Your reply</span><br>{{ q.customer_response }}</p>{% endif %}
+        {% if q.status == 'accepted' and q.downpayment and custom.status == 'awaiting_approval' %}
+        <div class="panel">
+          <p class="note note--thread">Downpayment — {{ q.downpayment | money }}</p>
+          {% if site.payment_instructions %}{{ site.payment_instructions | nl2p }}{% else %}<p>Kyla will send downpayment details in the messages below.</p>{% endif %}
+          <p class="small muted">Work is scheduled once Kyla confirms the agreement. Payment is never taken on this website.</p>
+        </div>
+        {% endif %}
+        {% if q.status == 'sent' and custom.status == 'quotation_sent' %}
+        <form method="post" class="quote-card__answer">
+          {{ m.csrf() }}
+          <label class="visually-hidden" for="q-resp-{{ q.id }}">Reply (optional)</label>
+          <textarea class="textarea" id="q-resp-{{ q.id }}" name="response" rows="2" maxlength="2000" placeholder="A reply for Kyla (optional)…"></textarea>
+          <div class="acct__actions">
+            <button class="btn" type="submit" formaction="/account/custom/{{ custom.id }}/quotations/{{ q.id }}/accept">Accept quotation</button>
+            <button class="btn btn--ghost" type="submit" formaction="/account/custom/{{ custom.id }}/quotations/{{ q.id }}/decline">Decline</button>
+          </div>
+          <p class="small muted">Accepting tells Kyla you agree to this quotation. She will then confirm the agreement and next steps before work begins.</p>
+        </form>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </section>
+    {% endif %}
+
+    {% if custom.status in ['approved', 'in_progress', 'ready_for_fitting', 'completed'] and (custom.fitting_date or custom.deadline) %}
+    <dl class="facts">
+      {% if custom.fitting_date %}<div><dt>Fitting</dt><dd>{{ custom.fitting_date | date }}</dd></div>{% endif %}
+      {% if custom.deadline %}<div><dt>Ready by</dt><dd>{{ custom.deadline | date }}</dd></div>{% endif %}
+    </dl>
+    {% endif %}
+
+    <h2 class="eyebrow" style="margin-top: 2.5rem">Your request</h2>
+    <dl class="facts">
+      {% if custom.based_on_name %}<div><dt>Based on</dt><dd><a href="/gowns/{{ custom.based_on_slug }}">{{ custom.based_on_name }}</a></dd></div>{% endif %}
+      {% if custom.event_date %}<div><dt>Event</dt><dd>{{ custom.event_date | date }}</dd></div>{% endif %}
+      {% if custom.silhouette %}<div><dt>Design</dt><dd>{{ custom.silhouette }}</dd></div>{% endif %}
+      {% if custom.colors %}<div><dt>Colours</dt><dd>{{ custom.colors }}</dd></div>{% endif %}
+      {% if custom.fabrics %}<div><dt>Fabrics</dt><dd>{{ custom.fabrics }}</dd></div>{% endif %}
+      {% if custom.budget_min or custom.budget_max %}<div><dt>Budget</dt><dd>{{ custom.budget_min | money }}{% if custom.budget_min and custom.budget_max %} – {% endif %}{{ custom.budget_max | money }}</dd></div>{% endif %}
+      {% for k, v in measurements %}<div><dt>{{ k | capitalize }}</dt><dd>{{ v }}</dd></div>{% endfor %}
+      {% if custom.instructions %}<div><dt>Notes</dt><dd>{{ custom.instructions | nl2p }}</dd></div>{% endif %}
+    </dl>
+    {% if images.length %}
+    <div class="insp" aria-label="Inspiration images">
+      {% for i in images %}<a href="/media/p/{{ i.id }}/full" target="_blank" rel="noopener"><img src="/media/p/{{ i.id }}/thumb" alt="Inspiration image {{ loop.index }}" loading="lazy"></a>{% endfor %}
+    </div>
+    {% endif %}
+
+    {{ m.conversation(thread, '/account/custom/' + custom.id + '/message', user, csrfToken) }}
+  </div>
+  <aside class="record__side">
+    <h2 class="eyebrow">History</h2>
+    {{ m.timeline(history, status.CUSTOM) }}
+    {% if cancellable %}
+    <form method="post" action="/account/custom/{{ custom.id }}/cancel" data-confirm="Cancel this request?" style="margin-top: 2rem">
+      {{ m.csrf() }}<button class="btn btn--danger btn--small" type="submit">Cancel request</button>
+    </form>
+    {% endif %}
+    {% if site.custom_terms %}
+    <details class="ask" style="margin-top: 2rem"><summary class="link">Terms for custom work <span class="arrow">+</span></summary><div class="small" style="padding-top: .6rem">{{ site.custom_terms | nl2p }}</div></details>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

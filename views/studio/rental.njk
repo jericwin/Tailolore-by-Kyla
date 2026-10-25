@@ -1,0 +1,138 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}{{ rental.reference }} · Studio{% endblock %}
+
+{% block main %}
+<header class="s-head">
+  <div>
+    <p class="note"><a href="/studio/rentals">Rentals</a> / {{ rental.reference }}</p>
+    <h1>{{ rental.gown_name }}</h1>
+  </div>
+  <div class="s-head__actions">{{ m.statusMark(status.RENTAL, rental.status) }}</div>
+</header>
+
+<div class="s-body">
+  <div class="s-grid s-grid--main">
+    <div>
+      {% if overlapping.length %}
+      <div class="warn">
+        <strong>Overlapping requests for this gown:</strong>
+        <ul class="hint-list">
+          {% for o in overlapping %}<li><a href="/studio/rentals/{{ o.id }}">{{ o.reference }}</a> — {{ o.customer }}, {{ o.pickup_date | date('short') }}–{{ o.return_date | date('short') }} ({{ status.RENTAL[o.status].label }})</li>{% endfor %}
+        </ul>
+        {% if units.length > 1 %}This gown has {{ units.length }} pieces, so more than one booking may fit.{% endif %}
+      </div>
+      {% endif %}
+
+      <dl class="facts">
+        <div><dt>Customer</dt><dd>{{ rental.customer }}<br><span class="small"><a href="mailto:{{ rental.customer_email }}">{{ rental.customer_email }}</a>{% if rental.customer_phone %} · <a href="tel:{{ rental.customer_phone | replace(' ', '') }}">{{ rental.customer_phone }}</a>{% endif %}</span><br><a class="small" href="/studio/customers/{{ rental.customer_id }}">Customer history</a></dd></div>
+        <div><dt>Event</dt><dd>{{ rental.event_date | date }}</dd></div>
+        <div><dt>Pickup</dt><dd>{{ rental.pickup_date | date }}{% if rental.actual_pickup_at %} <span class="muted">· picked up {{ rental.actual_pickup_at | stamp }}</span>{% endif %}</dd></div>
+        <div><dt>Return</dt><dd>{{ rental.return_date | date }}{% if rental.actual_return_at %} <span class="muted">· returned {{ rental.actual_return_at | stamp }}</span>{% endif %}</dd></div>
+        {% if rental.size_note %}<div><dt>Size</dt><dd>{{ rental.size_note }}</dd></div>{% endif %}
+        <div><dt>Price</dt><dd>{{ rental.quoted_price | money }}{% if rental.period_days %} <span class="muted">· up to {{ rental.period_days }} days</span>{% endif %}</dd></div>
+        <div><dt>Deposit</dt><dd>{% if rental.quoted_deposit %}{{ rental.quoted_deposit | money }} — {{ status.DEPOSIT[rental.deposit_status] }}{% else %}None{% endif %}</dd></div>
+        <div><dt>Piece</dt><dd>{{ rental.unit_label or 'Assigned on approval' }}</dd></div>
+        {% if rental.return_condition %}<div><dt>Condition</dt><dd>{{ rental.return_condition | replace('_', ' ') | capitalize }}{% if rental.damage_notes %} — {{ rental.damage_notes }}{% endif %}</dd></div>{% endif %}
+        <div><dt>Requested</dt><dd>{{ rental.created_at | stamp }}</dd></div>
+      </dl>
+      {% if rental.customer_note %}<p class="note">Customer’s note</p><div class="quote">{{ rental.customer_note | nl2p }}</div>{% endif %}
+
+      {{ m.conversation(thread, '/studio/rentals/' + rental.id + '/message', user, csrfToken, 'Write to ' + rental.customer) }}
+    </div>
+
+    <aside>
+      {% if next.length %}
+      <div class="s-card">
+        <h2>Next step</h2>
+        <div class="status-actions">
+          {% if rental.status == 'requested' %}
+            {% if freeUnitId %}
+            <form method="post" action="/studio/rentals/{{ rental.id }}/status" class="boxed">
+              {{ m.csrf() }}
+              <input type="hidden" name="to" value="{{ 'awaiting_deposit' if depositFirst else 'confirmed' }}">
+              {% if units.length > 1 %}
+              <label class="small" for="unit">Assign piece</label>
+              <select class="select" id="unit" name="unit_id">{% for u in units %}<option value="{{ u.id }}" {% if u.id == freeUnitId %}selected{% endif %}>{{ u.label }}{% if u.size %} ({{ u.size }}){% endif %}</option>{% endfor %}</select>
+              {% endif %}
+              <textarea class="textarea" name="note" rows="2" maxlength="1000" placeholder="Note to the customer (optional)"></textarea>
+              <button class="btn btn--block" type="submit">Approve{% if depositFirst %} — hold dates, deposit due{% endif %}</button>
+            </form>
+            {% else %}
+            <p class="warn">No piece is free for these dates — an approved booking or a blocked date overlaps. You can still decline, or message the customer about other dates.</p>
+            {% endif %}
+            <form method="post" action="/studio/rentals/{{ rental.id }}/status" class="boxed">
+              {{ m.csrf() }}<input type="hidden" name="to" value="rejected">
+              <textarea class="textarea" name="note" rows="2" maxlength="1000" placeholder="Reason, shown to the customer" required></textarea>
+              <button class="btn btn--danger btn--block" type="submit">Decline</button>
+            </form>
+          {% else %}
+            {% for to in next %}
+            {% if to != 'cancelled' and not (to == 'confirmed' and rental.status == 'awaiting_deposit' and rental.quoted_deposit and rental.deposit_status != 'received') %}
+            <form method="post" action="/studio/rentals/{{ rental.id }}/status">
+              {{ m.csrf() }}<input type="hidden" name="to" value="{{ to }}">
+              <button class="btn btn--block {% if not loop.first %}btn--ghost{% endif %}" type="submit">{{ { confirmed: 'Confirm booking', picked_up: 'Mark as picked up', returned: 'Mark as returned', completed: 'Close rental' }[to] or status.RENTAL[to].label }}</button>
+            </form>
+            {% endif %}
+            {% endfor %}
+            {% if rental.status == 'awaiting_deposit' and rental.quoted_deposit and rental.deposit_status != 'received' %}
+            <p class="small muted">Record the deposit below to confirm the booking.</p>
+            {% endif %}
+            {% if 'cancelled' in next %}
+            <form method="post" action="/studio/rentals/{{ rental.id }}/status" class="boxed" data-confirm="Cancel this booking and release the dates?">
+              {{ m.csrf() }}<input type="hidden" name="to" value="cancelled">
+              <textarea class="textarea" name="note" rows="2" maxlength="1000" placeholder="Reason, shown to the customer"></textarea>
+              <button class="link-plain small" type="submit">Cancel booking</button>
+            </form>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if rental.quoted_deposit and rental.status not in ['requested', 'rejected'] %}
+      <div class="s-card">
+        <h2>Deposit</h2>
+        <form method="post" action="/studio/rentals/{{ rental.id }}/deposit" class="status-actions boxed">
+          {{ m.csrf() }}
+          <select class="select" name="deposit_status" aria-label="Deposit status">
+            {% for k, l in status.DEPOSIT %}{% if k != 'not_required' %}<option value="{{ k }}" {% if rental.deposit_status == k %}selected{% endif %}>{{ l }}</option>{% endif %}{% endfor %}
+          </select>
+          <input class="input" name="note" maxlength="500" placeholder="Method / reference (optional)">
+          <button class="btn btn--ghost btn--small" type="submit">Save</button>
+        </form>
+      </div>
+      {% endif %}
+
+      {% if rental.status in ['picked_up', 'returned', 'completed'] %}
+      <div class="s-card">
+        <h2>Return check</h2>
+        <form method="post" action="/studio/rentals/{{ rental.id }}/return" class="status-actions boxed">
+          {{ m.csrf() }}
+          {% for k, l in { good: 'Good condition', needs_cleaning: 'Needs cleaning', damaged: 'Damaged' } %}
+          <label class="check"><input type="radio" name="return_condition" value="{{ k }}" {% if rental.return_condition == k %}checked{% endif %} required> {{ l }}</label>
+          {% endfor %}
+          <textarea class="textarea" name="damage_notes" rows="3" maxlength="2000" placeholder="Describe any damage">{{ rental.damage_notes }}</textarea>
+          <button class="btn btn--ghost btn--small" type="submit">{{ 'Record return' if rental.status == 'picked_up' else 'Update' }}</button>
+        </form>
+      </div>
+      {% endif %}
+
+      <div class="s-card">
+        <h2>Private note</h2>
+        <form method="post" action="/studio/rentals/{{ rental.id }}/note" class="status-actions boxed">
+          {{ m.csrf() }}
+          <textarea class="textarea" name="admin_note" rows="3" maxlength="4000" placeholder="Only you can see this">{{ rental.admin_note }}</textarea>
+          <button class="btn btn--ghost btn--small" type="submit">Save note</button>
+        </form>
+      </div>
+
+      <div class="s-card">
+        <h2>History</h2>
+        {{ m.timeline(history, status.RENTAL) }}
+        <p style="margin-top: 1rem"><a class="small" href="/studio/gowns/{{ rental.gown_id }}#availability">Gown calendar →</a></p>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "layouts/site.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Help signing in · {{ site.brand_name }}{% endblock %}
+
+{% block main %}
+<div class="auth">
+  <div class="auth__side" aria-hidden="true">
+    <img src="/static/img/brand/monogram-ivory.png" alt="" width="400" height="333">
+    <span class="note">{{ site.brand_name }}{% if site.location %} — {{ site.location }}{% endif %}</span>
+  </div>
+  <div class="auth__panel">
+    <div>
+      <p class="note">Forgotten your password?</p>
+      <h1>Help <em>signing in</em></h1>
+    </div>
+    {% if sent %}
+    <div class="panel" role="status">
+      <p class="note note--thread">Request sent</p>
+      <p>If there’s an account for that email, Kyla has been told. She’ll contact you to confirm it’s you and give you a temporary password — usually by phone{% if site.facebook_url %} or Facebook{% endif %}.</p>
+      <p class="small muted">When you sign in with it, you’ll be asked to choose a new password straight away.</p>
+    </div>
+    <a class="link" href="/login">Back to sign in <span class="arrow">→</span></a>
+    {% else %}
+    <p class="small">Tell us the email you signed up with. Kyla will check it’s you and send you a temporary password — there’s no reset email yet.</p>
+    <form method="post" action="/forgot-password">
+      {{ m.csrf() }}
+      {{ m.field('email', 'Email', values, errors, type='email', required=true, attrs='autocomplete="email" autofocus') }}
+      {{ m.field('contact', 'How should Kyla reach you?', values, errors, hint='For example your mobile number or Facebook name. Leave blank to use the details on your account.', attrs='maxlength="300" autocomplete="tel"') }}
+      <button class="btn btn--block" type="submit">Ask for help</button>
+    </form>
+    <p class="small"><a href="/login">Back to sign in</a>{% if site.facebook_url %} · or message Kyla on <a href="{{ site.facebook_url }}" rel="noopener" target="_blank">Facebook</a>{% endif %}</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

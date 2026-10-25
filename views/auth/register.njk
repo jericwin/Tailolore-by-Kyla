@@ -1,0 +1,39 @@
+{% extends "layouts/site.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Create an account · {{ site.brand_name }}{% endblock %}
+
+{% block main %}
+<div class="auth">
+  <div class="auth__side" aria-hidden="true">
+    <img src="/static/img/brand/monogram-ivory.png" alt="" width="400" height="333">
+    <span class="note">{{ site.brand_name }}{% if site.location %} — {{ site.location }}{% endif %}</span>
+  </div>
+  <div class="auth__panel">
+    <div>
+      <p class="note">Your account</p>
+      <h1>Create <em>an account</em></h1>
+    </div>
+    <p class="small muted">Rent, buy or commission a gown, keep a wishlist, and talk with Kyla — all in one place. Your details are only shared with the studio.</p>
+    <form method="post" action="/register">
+      {{ m.csrf() }}
+      <input type="hidden" name="next" value="{{ next }}">
+      {{ m.field('full_name', 'Your name', values, errors, required=true, attrs='autocomplete="name" maxlength="120"') }}
+      {{ m.field('email', 'Email', values, errors, type='email', required=true, attrs='autocomplete="email"') }}
+      {{ m.field('phone', 'Mobile number', values, errors, type='tel', hint='Helpful for arranging fittings and pickups.', attrs='autocomplete="tel"') }}
+      <div class="field">
+        <label for="f-password">Password</label>
+        <input class="input" id="f-password" name="password" type="password" required minlength="10" autocomplete="new-password" aria-describedby="h-password{% if errors.password %} e-password{% endif %}" {% if errors.password %}aria-invalid="true"{% endif %}>
+        <span class="hint" id="h-password">At least 10 characters.</span>
+        {% if errors.password %}<span class="error" id="e-password">{{ errors.password }}</span>{% endif %}
+      </div>
+      <div class="field">
+        <label for="f-password2">Repeat password</label>
+        <input class="input" id="f-password2" name="password_confirm" type="password" required autocomplete="new-password" {% if errors.password_confirm %}aria-invalid="true"{% endif %}>
+        {% if errors.password_confirm %}<span class="error">{{ errors.password_confirm }}</span>{% endif %}
+      </div>
+      <button class="btn btn--block" type="submit">Create account</button>
+    </form>
+    <p class="small">Already have one? <a href="/login{% if next %}?next={{ next | urlencode }}{% endif %}">Sign in</a></p>
+  </div>
+</div>
+{% endblock %}

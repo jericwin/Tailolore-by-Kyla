@@ -1,0 +1,117 @@
+{% extends "layouts/account.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Your account · {{ site.brand_name }}{% endblock %}
+
+{#- One in-progress request: picture, name, reference, status and where it is in the process. -#}
+{% macro item(href, thumb, title, meta, map, statusKey, kind, mark=null) %}
+<li><a href="{{ href }}" class="track">
+  <span class="track__thumb {% if not thumb %}track__thumb--mark{% endif %}">{% if thumb %}<img src="{{ imgSrc(thumb, 480) }}" alt="" loading="lazy">{% else %}{{ mark }}{% endif %}</span>
+  <span class="track__main">
+    <span class="track__top"><span class="track__title">{{ title }}</span>{{ m.statusMark(map, statusKey) }}</span>
+    <span class="note">{{ meta }}</span>
+    {{ m.progress(kind, statusKey) }}
+  </span>
+</a></li>
+{% endmacro %}
+
+{% block content %}
+{#- What the customer needs to do next, most urgent first. -#}
+{% set todo = [] %}
+{% for r in rentals %}{% if r.status == 'awaiting_deposit' %}{% set todo = (todo.push({ href: '/account/rentals/' + r.id, what: 'Pay the deposit for the ' + r.gown_name, why: 'Your dates are held; the booking is confirmed once Kyla receives it.', cta: 'How to pay' }), todo) %}{% endif %}{% endfor %}
+{% for c in customs %}{% if c.status == 'quotation_sent' %}{% set todo = (todo.push({ href: '/account/custom/' + c.id, what: 'Review your quotation — ' + c.event_type, why: 'Nothing begins until you accept it.', cta: 'Review' }), todo) %}{% elif c.status == 'ready_for_fitting' %}{% set todo = (todo.push({ href: '/account/custom/' + c.id, what: 'Your gown is ready for a fitting — ' + c.event_type, why: 'Message Kyla to arrange a time.', cta: 'Open' }), todo) %}{% endif %}{% endfor %}
+{% for o in orders %}{% if o.status == 'confirmed' and o.payment_status == 'unpaid' %}{% set todo = (todo.push({ href: '/account/orders/' + o.id, what: 'Arrange payment for the ' + o.gown_name, why: 'Kyla confirmed your order.', cta: 'Payment details' }), todo) %}{% elif o.status == 'ready' %}{% set todo = (todo.push({ href: '/account/orders/' + o.id, what: 'The ' + o.gown_name + ' is ready', why: ('It will be delivered to you.' if o.fulfillment == 'delivery' else 'It is ready for pickup.'), cta: 'Details' }), todo) %}{% endif %}{% endfor %}
+{% set active = rentals.length + orders.length + customs.length %}
+
+<header class="welcome">
+  <p class="note">Your account</p>
+  <h1 class="h1">Hello, <em>{{ user.fullName.split(' ')[0] }}</em></h1>
+  <p class="welcome__line">
+    {% if active %}You have
+      {% set parts = [] %}
+      {% if rentals.length %}{% set parts = (parts.push(rentals.length + (' rental' if rentals.length == 1 else ' rentals')), parts) %}{% endif %}
+      {% if orders.length %}{% set parts = (parts.push(orders.length + (' purchase' if orders.length == 1 else ' purchases')), parts) %}{% endif %}
+      {% if customs.length %}{% set parts = (parts.push(customs.length + (' custom gown' if customs.length == 1 else ' custom gowns')), parts) %}{% endif %}
+      {{ parts | join(', ') }} in progress{% if todo.length %}, and {{ todo.length }} thing{% if todo.length != 1 %}s{% endif %} waiting for you{% endif %}.
+    {% else %}Nothing in progress yet — when you rent, buy or commission a gown, you’ll follow every step here.{% endif %}
+  </p>
+  <nav class="welcome__actions" aria-label="Quick actions">
+    <a href="/collection?service=rent"><span class="note">i.</span> Rent a gown</a>
+    <a href="/collection?service=buy"><span class="note">ii.</span> Buy a gown</a>
+    <a href="/commission"><span class="note">iii.</span> Commission one</a>
+  </nav>
+</header>
+
+{% if todo.length %}
+<section class="attention" aria-labelledby="att-h">
+  <h2 class="attention__h" id="att-h">Needs your attention <span class="acct__count is-new">{{ todo.length }}</span></h2>
+  <ul role="list">
+    {% for t in todo %}
+    <li><a href="{{ t.href }}">
+      <span class="attention__what">{{ t.what }}</span>
+      <span class="attention__why">{{ t.why }}</span>
+      <span class="attention__cta">{{ t.cta }} <span aria-hidden="true">→</span></span>
+    </a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if rentals.length %}
+<section class="acct__block">
+  <h2 class="acct__h">Rentals in progress <a class="note" href="/account/rentals">All rentals</a></h2>
+  <ul class="tracks" role="list">
+    {% for r in rentals %}{{ item('/account/rentals/' + r.id, r.thumb_key, r.gown_name, r.reference + ' · event ' + (r.event_date | date), status.RENTAL, r.status, 'rental') }}{% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if orders.length %}
+<section class="acct__block">
+  <h2 class="acct__h">Purchases in progress <a class="note" href="/account/orders">All purchases</a></h2>
+  <ul class="tracks" role="list">
+    {% for o in orders %}{{ item('/account/orders/' + o.id, o.thumb_key, o.gown_name, o.reference + ' · ' + (o.quoted_price | money), status.ORDER, o.status, 'order') }}{% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if customs.length %}
+<section class="acct__block">
+  <h2 class="acct__h">Custom gowns <a class="note" href="/account/custom">All custom orders</a></h2>
+  <ul class="tracks" role="list">
+    {% for c in customs %}{{ item('/account/custom/' + c.id, null, c.event_type, c.reference + ((' · ' + (c.event_date | date)) if c.event_date else ''), status.CUSTOM, c.status, 'custom', loop.index | pad) }}{% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<section class="acct__block acct__split">
+  <div>
+    <h2 class="acct__h">Latest notices <a class="note" href="/account/notifications">All</a></h2>
+    {% if notifications.length %}
+    <ul class="notices" role="list">
+      {% for n in notifications %}
+      <li class="{% if not n.read_at %}is-unread{% endif %}"><a href="/account/notifications/{{ n.id }}"><span>{{ n.title }}</span><span class="note">{{ n.created_at | stamp }}</span></a></li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="muted small">Nothing yet.</p>{% endif %}
+  </div>
+  <div>
+    <h2 class="acct__h">Saved gowns <a class="note" href="/account/wishlist">Wishlist</a></h2>
+    {% if wishItems.length %}
+    <ul class="saved" role="list">
+      {% for w in wishItems %}
+      <li><a href="/gowns/{{ w.slug }}">{% if w.thumb_key %}<img src="{{ imgSrc(w.thumb_key, 480) }}" alt="" loading="lazy">{% endif %}<span class="small">{{ w.name }}</span></a></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="small muted">Tap “Save” on any gown to keep it here.</p>
+    {% endif %}
+    <h2 class="acct__h" style="margin-top: 2.4rem">Write to Kyla</h2>
+    <form method="post" action="/account/messages" class="stack">
+      {{ m.csrf() }}
+      <label class="visually-hidden" for="general-msg">Message</label>
+      <textarea class="textarea" id="general-msg" name="body" rows="3" maxlength="4000" required placeholder="A general question…"></textarea>
+      <button class="btn btn--small" type="submit">Send</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

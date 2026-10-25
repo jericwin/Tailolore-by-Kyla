@@ -1,0 +1,38 @@
+{% extends "layouts/site.njk" %}
+{% block title %}Atelier · {{ site.brand_name }}{% endblock %}
+
+{% block main %}
+<header class="page-head">
+  <p class="note">§ 04</p>
+  <h1>The <em>atelier</em></h1>
+</header>
+
+<section class="atelier-page">
+  <div class="atelier-page__mark" aria-hidden="true">
+    <img src="/static/img/brand/monogram-ink.png" alt="" width="400" height="333">
+  </div>
+  <div class="atelier-page__text">
+    <h2 class="h2" style="margin-bottom: 1.4rem">{% if site.about_heading %}{{ site.about_heading }}{% else %}{{ site.brand_name }}{% endif %}</h2>
+    {% if site.about_text %}
+      <div class="lede">{{ site.about_text | nl2p }}</div>
+    {% else %}
+      <p class="lede">Gowns to rent, to buy, and made to order{% if site.location %} — from {{ site.location }}{% endif %}.</p>
+    {% endif %}
+  </div>
+
+  <dl class="atelier-page__facts">
+    {% if site.location %}<div><dt>Studio</dt><dd>{{ site.location }}</dd></div>{% endif %}
+    {% if site.studio_hours %}<div><dt>Hours</dt><dd>{{ site.studio_hours }}</dd></div>{% endif %}
+    <div><dt>Services</dt><dd>Rental · Purchase · Made to order</dd></div>
+    {% if totalGowns %}<div><dt>Collection</dt><dd><a href="/collection">{{ totalGowns }} gown{% if totalGowns != 1 %}s{% endif %} online</a></dd></div>{% endif %}
+    <div><dt>Enquiries</dt><dd>
+      {% if user and not isAdmin %}<a href="/account/messages">Message Kyla from your account</a><br>{% elif not user %}<a href="/register">Create an account</a> to message Kyla and follow your requests<br>{% endif %}
+      {% if site.messenger_url %}<a href="{{ site.messenger_url }}" rel="noopener" target="_blank">Messenger</a><br>{% endif %}
+      {% if site.facebook_url %}<a href="{{ site.facebook_url }}" rel="noopener" target="_blank">Facebook page</a><br>{% endif %}
+      {% if site.instagram_url %}<a href="{{ site.instagram_url }}" rel="noopener" target="_blank">Instagram</a><br>{% endif %}
+      {% if site.contact_email %}<a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a><br>{% endif %}
+      {% if site.contact_phone %}<a href="tel:{{ site.contact_phone | replace(' ', '') }}">{{ site.contact_phone }}</a>{% endif %}
+    </dd></div>
+  </dl>
+</section>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}{{ customer.full_name }} · Studio{% endblock %}
+
+{% block main %}
+<header class="s-head">
+  <div><p class="note"><a href="/studio/customers">Customers</a></p><h1>{{ customer.full_name }}</h1></div>
+  {% if customer.disabled %}<span class="status status--closed">Disabled</span>{% endif %}
+</header>
+<div class="s-body">
+  <div class="s-grid s-grid--main">
+    <div>
+      <dl class="facts">
+        <div><dt>Email</dt><dd><a href="mailto:{{ customer.email }}">{{ customer.email }}</a></dd></div>
+        <div><dt>Phone</dt><dd>{% if customer.phone %}<a href="tel:{{ customer.phone | replace(' ', '') }}">{{ customer.phone }}</a>{% else %}—{% endif %}</dd></div>
+        {% if customer.address %}<div><dt>Address</dt><dd>{{ customer.address }}</dd></div>{% endif %}
+        <div><dt>Joined</dt><dd>{{ customer.created_at | stamp }}</dd></div>
+      </dl>
+
+      {% for title, rows, base, map, label in [
+        ['Rentals', rentals, '/studio/rentals/', status.RENTAL, 'gown_name'],
+        ['Purchases', orders, '/studio/orders/', status.ORDER, 'gown_name'],
+        ['Custom gowns', customs, '/studio/custom/', status.CUSTOM, 'event_type']
+      ] %}
+      <section class="s-section">
+        <h2>{{ title }} <span class="note">{{ rows.length }}</span></h2>
+        {% if rows.length %}
+        <ul class="calendar-list">
+          {% for r in rows %}<li><a class="ref note" href="{{ base }}{{ r.id }}">{{ r.reference }}</a><span>{{ r[label] }}</span>{{ m.statusMark(map, r.status) }}</li>{% endfor %}
+        </ul>
+        {% else %}<p class="empty" style="padding: 0">None.</p>{% endif %}
+      </section>
+      {% endfor %}
+
+      {% if threads.length %}
+      <section class="s-section">
+        <h2>Conversations</h2>
+        <ul class="calendar-list">{% for t in threads %}<li><span class="note">{{ t.last_message_at | stamp }}</span><a href="/studio/messages/{{ t.id }}">{{ t.subject_label }}</a><span>{% if t.studio_unread %}<span class="dot">{{ t.studio_unread }}</span>{% endif %}</span></li>{% endfor %}</ul>
+      </section>
+      {% endif %}
+    </div>
+    <aside>
+      {% if tempPassword %}
+      <div class="s-card" style="border-color: var(--ink)">
+        <h2>Temporary password</h2>
+        <p class="small">Give this to {{ customer.full_name }} privately — by phone or a private message. It is shown only once. When they sign in with it they’ll be asked to choose their own password.</p>
+        <p style="font: 1.1rem var(--mono); background: var(--bone); padding: .6rem .8rem; user-select: all">{{ tempPassword }}</p>
+      </div>
+      {% endif %}
+      {% if customer.password_help_at and not tempPassword %}
+      <div class="s-card" style="border-color: var(--tone-pending)">
+        <h2>Asked for help signing in</h2>
+        <p class="small">{{ customer.password_help_at | stamp }}{% if customer.password_help_note %} — reach them: <strong>{{ customer.password_help_note }}</strong>{% endif %}</p>
+        <p class="small muted" style="margin: 0">Check it’s really them (for example, call the number on the account), then set a temporary password below.</p>
+      </div>
+      {% endif %}
+      <div class="s-card">
+        <h2>Account access</h2>
+        <form method="post" action="/studio/customers/{{ customer.id }}/reset-password" class="status-actions" data-confirm="Set a new temporary password for {{ customer.full_name }}? Their current password stops working.">
+          {{ m.csrf() }}
+          <p class="small muted" style="margin: 0">For customers who have lost their password. Without email set up, this is how access is restored.</p>
+          <button class="btn btn--ghost btn--small" type="submit">Set temporary password</button>
+        </form>
+        <hr>
+        <form method="post" action="/studio/customers/{{ customer.id }}/access" class="status-actions" data-confirm="{{ 'Re-enable' if customer.disabled else 'Disable' }} this account?">
+          {{ m.csrf() }}<input type="hidden" name="disabled" value="{{ '0' if customer.disabled else '1' }}">
+          <button class="{{ 'btn btn--ghost btn--small' if customer.disabled else 'link-plain small' }}" type="submit">{{ 'Re-enable account' if customer.disabled else 'Disable account' }}</button>
+        </form>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

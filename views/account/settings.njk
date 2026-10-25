@@ -1,0 +1,40 @@
+{% extends "layouts/account.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Account settings · {{ site.brand_name }}{% endblock %}
+
+{% block content %}
+<header class="acct__head"><p class="note">Account settings</p><h1 class="h1">Your <em>details</em></h1></header>
+<div class="acct__split">
+  <form method="post" action="/account/settings">
+    {{ m.csrf() }}
+    <h2 class="acct__h">Contact details</h2>
+    {{ m.field('full_name', 'Name', values, errors, required=true, attrs='autocomplete="name" maxlength="120"') }}
+    {{ m.field('email', 'Email', values, errors, type='email', required=true, attrs='autocomplete="email"') }}
+    {{ m.field('phone', 'Mobile number', values, errors, type='tel', attrs='autocomplete="tel"') }}
+    {{ m.field('address', 'Address', values, errors, type='textarea', hint='Used only if you ask for a delivery.', attrs='rows="3" autocomplete="street-address"') }}
+    <div class="field">
+      <label for="f-current_password">Current password <span class="muted">(only to change your email)</span></label>
+      <input class="input" id="f-current_password" name="current_password" type="password" autocomplete="current-password" {% if errors.current_password %}aria-invalid="true"{% endif %}>
+      {% if errors.current_password %}<span class="error">{{ errors.current_password }}</span>{% endif %}
+    </div>
+    <button class="btn" type="submit">Save details</button>
+  </form>
+
+  <form method="post" action="/account/settings/password" id="password">
+    {{ m.csrf() }}
+    <h2 class="acct__h">Password</h2>
+    {% if user.mustChangePassword %}
+    <p class="panel small"><span class="note note--thread">Choose your own password</span><br>You signed in with a temporary password from Kyla. Enter it below as your current password, then choose a new one.</p>
+    {% endif %}
+    {% for name, label, ac in [['current_password', 'Temporary password' if user.mustChangePassword else 'Current password', 'current-password'], ['new_password', 'New password', 'new-password'], ['new_password_confirm', 'Repeat new password', 'new-password']] %}
+    <div class="field">
+      <label for="pw-{{ name }}">{{ label }}</label>
+      <input class="input" id="pw-{{ name }}" name="{{ name }}" type="password" required autocomplete="{{ ac }}" {% if pwErrors[name] %}aria-invalid="true"{% endif %}>
+      {% if pwErrors[name] %}<span class="error">{{ pwErrors[name] }}</span>{% endif %}
+    </div>
+    {% endfor %}
+    <button class="btn btn--ghost" type="submit">Change password</button>
+    <p class="small muted" style="margin-top: 1rem">Changing your password signs you out on other devices.</p>
+  </form>
+</div>
+{% endblock %}

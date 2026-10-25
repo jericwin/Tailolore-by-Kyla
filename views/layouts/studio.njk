@@ -1,0 +1,50 @@
+{% extends "layouts/base.njk" %}
+{% block styles %}
+<link rel="stylesheet" href="/static/css/site.css?v={{ assetVersion }}">
+<link rel="stylesheet" href="/static/css/app.css?v={{ assetVersion }}">
+<link rel="stylesheet" href="/static/css/studio.css?v={{ assetVersion }}">
+{% endblock %}
+{% block title %}Studio · {{ site.brand_name }}{% endblock %}
+{% block bodyClass %}studio-body{% endblock %}
+
+{% block body %}
+<div class="studio">
+  <header class="studio__bar">
+    <a class="studio__brand" href="/studio">
+      <img src="/static/img/brand/monogram-ivory.png" alt="" width="40" height="34">
+      <span>Studio</span>
+    </a>
+    <button class="studio__toggle" type="button" aria-expanded="false" aria-controls="studio-nav" data-menu-toggle><span class="menu-toggle__label">Menu</span></button>
+    <nav class="studio__nav" id="studio-nav" aria-label="Studio" data-menu>
+      {% set c = studioCounts or {} %}
+      <ul>
+        <li><a href="/studio" {% if section == 'overview' %}aria-current="page"{% endif %}>Overview</a></li>
+        <li><a href="/studio/gowns" {% if section == 'gowns' %}aria-current="page"{% endif %}>Gowns</a></li>
+        <li><a href="/studio/library" {% if section == 'library' %}aria-current="page"{% endif %}>Photo library</a></li>
+        <li><a href="/studio/showcase" {% if section == 'showcase' %}aria-current="page"{% endif %}>Homepage</a></li>
+        <li><a href="/studio/rentals" {% if section == 'rentals' %}aria-current="page"{% endif %}>Rentals{% if c.rentals %}<span class="count">{{ c.rentals }}</span>{% endif %}</a></li>
+        <li><a href="/studio/orders" {% if section == 'orders' %}aria-current="page"{% endif %}>Purchases{% if c.orders %}<span class="count">{{ c.orders }}</span>{% endif %}</a></li>
+        <li><a href="/studio/custom" {% if section == 'custom' %}aria-current="page"{% endif %}>Custom gowns{% if c.custom %}<span class="count">{{ c.custom }}</span>{% endif %}</a></li>
+        <li><a href="/studio/messages" {% if section == 'messages' %}aria-current="page"{% endif %}>Messages{% if c.messages %}<span class="count">{{ c.messages }}</span>{% endif %}</a></li>
+        <li><a href="/studio/customers" {% if section == 'customers' %}aria-current="page"{% endif %}>Customers</a></li>
+      </ul>
+      <ul class="studio__nav-minor">
+        <li><a href="/studio/notifications" {% if section == 'notifications' %}aria-current="page"{% endif %}>Notifications{% if unread %}<span class="count">{{ unread }}</span>{% endif %}</a></li>
+        <li><a href="/studio/categories" {% if section == 'categories' %}aria-current="page"{% endif %}>Categories</a></li>
+        <li><a href="/studio/settings" {% if section == 'settings' %}aria-current="page"{% endif %}>Settings</a></li>
+        <li><a href="/" target="_blank" rel="noopener">View website ↗</a></li>
+        <li><form method="post" action="/logout"><input type="hidden" name="_csrf" value="{{ csrfToken }}"><button type="submit">Sign out</button></form></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main" class="studio__main">
+    {% if flash %}
+    <div class="flash {% if flash.type == 'error' %}flash--error{% endif %}" role="status" data-flash>
+      <span>{{ flash.message }}</span><button type="button" aria-label="Dismiss" data-dismiss>×</button>
+    </div>
+    {% endif %}
+    {% block main %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

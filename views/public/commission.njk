@@ -1,0 +1,122 @@
+{% extends "layouts/site.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Commission a gown · {{ site.brand_name }}{% endblock %}
+
+{% block main %}
+<header class="page-head">
+  <p class="note">§ 03</p>
+  <h1>Made <em>for you</em></h1>
+  <p class="page-head__aside">Describe the gown you have in mind. Kyla reviews every request and replies with questions or a quotation — nothing is agreed until you accept it.</p>
+</header>
+
+<div class="commission">
+  <aside class="commission__aside">
+    <ol class="commission__steps">
+      <li><strong>Your request</strong>The occasion, the date, what you imagine, and any pictures that inspire you.</li>
+      <li><strong>Review &amp; quotation</strong>Kyla may ask questions, then sends a quotation to your account.</li>
+      <li><strong>Your answer</strong>Accept or decline the quotation. Nothing begins before you accept.</li>
+      <li><strong>Agreement</strong>Kyla confirms the details and next steps — measurements, fittings and deadlines.</li>
+    </ol>
+    {% if site.custom_terms %}
+    <details class="ask" style="margin-top: 1.5rem">
+      <summary class="link">Terms for custom work <span class="arrow">+</span></summary>
+      <div class="small" style="padding-top: .8rem">{{ site.custom_terms | nl2p }}</div>
+    </details>
+    {% endif %}
+  </aside>
+
+  <div class="commission__form">
+    {% if basedOn %}
+    <div class="based-on">
+      {{ m.plate(basedOn.main, sizes='90px', alt=basedOn.name) }}
+      <div><span class="note">Based on</span><br><span class="serif" style="font-size: 1.3rem">{{ basedOn.name }}</span></div>
+    </div>
+    {% endif %}
+
+    {% if not user %}
+    <div class="signin-note" style="border-top: 1px solid var(--ink); padding-top: 1.6rem">
+      <p class="lede">Sign in to send a request.</p>
+      <p class="muted">An account keeps your measurements private, lets you receive the quotation, and keeps every message with Kyla in one place.</p>
+      <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap">
+        <a class="btn" href="/login?next={{ ('/commission' + ('?gown=' + basedOn.slug if basedOn else '')) | urlencode }}">Sign in</a>
+        <a class="link" href="/register?next={{ ('/commission' + ('?gown=' + basedOn.slug if basedOn else '')) | urlencode }}">Create an account <span class="arrow">→</span></a>
+      </div>
+    </div>
+    {% elif isAdmin %}
+    <p class="muted">You’re signed in as the studio. Customers see the request form here.</p>
+    {% else %}
+    <form method="post" action="/commission" enctype="multipart/form-data">
+      {{ m.csrf() }}
+      {% if basedOn %}<input type="hidden" name="based_on" value="{{ basedOn.slug }}">{% endif %}
+      {% if formError %}<p class="form-error" role="alert">{{ formError }}</p>{% elif errors | length %}<p class="form-error" role="alert">Please check the highlighted fields.</p>{% endif %}
+
+      <fieldset>
+        <legend><span class="note">i.</span>The occasion</legend>
+        <div class="row">
+          {{ m.field('event_type', 'Occasion', values, errors, required=true, hint='Wedding, debut, prom, pageant, gala…', attrs='maxlength="120"') }}
+          {{ m.field('event_date', 'Event date', values, errors, type='date', attrs='min="' + minDate + '"') }}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="note">ii.</span>The gown</legend>
+        {{ m.field('silhouette', 'Silhouette & design', values, errors, type='textarea', hint='Ball gown, mermaid, A-line; neckline, sleeves, train…', attrs='rows="3" maxlength="600"') }}
+        <div class="row">
+          {{ m.field('colors', 'Colours', values, errors, attrs='maxlength="300"') }}
+          {{ m.field('fabrics', 'Fabrics & details', values, errors, hint='Lace, beadwork, tulle, satin…', attrs='maxlength="600"') }}
+        </div>
+        <div class="field">
+          <span class="label">Inspiration images <span class="muted">(optional)</span></span>
+          <div class="file-drop">
+            <input type="file" name="inspiration" accept="image/jpeg,image/png,image/webp,image/avif" multiple data-preview="insp-previews" aria-describedby="h-insp">
+            <span class="hint" id="h-insp">Up to 6 pictures. They’re visible only to you and Kyla.</span>
+            <div class="file-previews" id="insp-previews"></div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="note">iii.</span>Measurements</legend>
+        <p class="small muted" style="margin-top: -.6rem">If you know them. Kyla will confirm measurements with you before cutting. Visible only to you and Kyla.</p>
+        <div class="row">
+          {{ m.field('m_bust', 'Bust', values, errors, attrs='maxlength="40" inputmode="decimal"') }}
+          {{ m.field('m_waist', 'Waist', values, errors, attrs='maxlength="40" inputmode="decimal"') }}
+          {{ m.field('m_hips', 'Hips', values, errors, attrs='maxlength="40" inputmode="decimal"') }}
+          {{ m.field('m_height', 'Height', values, errors, attrs='maxlength="40"') }}
+          {{ m.field('m_shoulder', 'Shoulder', values, errors, attrs='maxlength="40" inputmode="decimal"') }}
+        </div>
+        {{ m.field('m_other', 'Other measurements', values, errors, type='textarea', hint='Please say whether in inches or centimetres.', attrs='rows="2" maxlength="600"') }}
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="note">iv.</span>Budget &amp; notes</legend>
+        <div class="row">
+          {{ m.field('budget_min', 'Budget from (₱)', values, errors, attrs='inputmode="decimal" maxlength="12"') }}
+          {{ m.field('budget_max', 'Budget up to (₱)', values, errors, attrs='inputmode="decimal" maxlength="12"') }}
+        </div>
+        {{ m.field('instructions', 'Anything else', values, errors, type='textarea', attrs='rows="4" maxlength="4000"') }}
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="note">v.</span>Contact</legend>
+        <div class="row">
+          {{ m.field('contact_name', 'Name', values, errors, required=true, attrs='autocomplete="name" maxlength="120"') }}
+          {{ m.field('contact_email', 'Email', values, errors, type='email', required=true, attrs='autocomplete="email"') }}
+          {{ m.field('contact_phone', 'Phone', values, errors, type='tel', attrs='autocomplete="tel"') }}
+        </div>
+        <div class="field">
+          <label for="f-preferred">Preferred way to talk</label>
+          <select class="select" id="f-preferred" name="preferred_contact">
+            {% for v, l in { messages: 'Messages on this website', phone: 'Phone', email: 'Email', facebook: 'Facebook Messenger' } %}
+            <option value="{{ v }}" {% if values.preferred_contact == v %}selected{% endif %}>{{ l }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </fieldset>
+
+      <button class="btn" type="submit">Send request</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

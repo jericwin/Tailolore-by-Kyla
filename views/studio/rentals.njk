@@ -1,0 +1,38 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Rentals · Studio{% endblock %}
+
+{% block main %}
+<header class="s-head"><div><p class="note">Bookings</p><h1>Rentals</h1></div></header>
+<nav class="s-tabs" aria-label="Rental views">
+  {% for k, v in VIEWS %}<a href="/studio/rentals?view={{ k }}" {% if view == k %}aria-current="true"{% endif %}>{{ v.label }}<span class="note">{{ counts[k] }}</span></a>{% endfor %}
+</nav>
+<div class="s-body">
+  <form class="s-search boxed" method="get" action="/studio/rentals">
+    <input type="hidden" name="view" value="{{ view }}">
+    <label class="visually-hidden" for="q">Search</label>
+    <input class="input" id="q" name="q" value="{{ q }}" placeholder="Reference, customer or gown">
+    <button class="btn btn--ghost btn--small" type="submit">Search</button>
+  </form>
+  {% if rentals.length %}
+  <div class="table-wrap">
+    <table class="table table--stack">
+      <thead><tr><th>Reference</th><th>Gown</th><th>Customer</th><th>Pickup → return</th><th>Event</th><th>Status</th><th>Deposit</th></tr></thead>
+      <tbody>
+        {% for r in rentals %}
+        <tr>
+          <td data-label="Ref"><a class="ref" href="/studio/rentals/{{ r.id }}">{{ r.reference }}</a></td>
+          <td><a class="table__main" href="/studio/rentals/{{ r.id }}">{{ r.gown_name }}</a>{% if r.unit_label %} <span class="note">{{ r.unit_label }}</span>{% endif %}</td>
+          <td data-label="Customer">{{ r.customer }}</td>
+          <td data-label="Dates" class="note">{{ r.pickup_date | date('short') }} → {{ r.return_date | date('short') }}</td>
+          <td data-label="Event" class="note">{{ r.event_date | date }}</td>
+          <td data-label="Status">{{ m.statusMark(status.RENTAL, r.status) }}</td>
+          <td data-label="Deposit" class="small">{% if r.quoted_deposit %}{{ status.DEPOSIT[r.deposit_status] }}{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="empty">Nothing here.</p>{% endif %}
+</div>
+{% endblock %}

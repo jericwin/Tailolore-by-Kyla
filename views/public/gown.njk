@@ -1,0 +1,224 @@
+{% extends "layouts/site.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}{{ gown.name }} · {{ site.brand_name }}{% endblock %}
+{% block description %}{{ gown.description | truncate(150) if gown.description else gown.name + ' — ' + site.brand_name }}{% endblock %}
+{% block ogImage %}{% if gown.main %}{{ gown.main.src }}{% else %}/static/img/brand/og-card.jpg{% endif %}{% endblock %}
+{% block scripts %}
+<script src="/static/js/lightbox.js?v={{ assetVersion }}" defer></script>
+{% if gown.canRent %}<script src="/static/js/datepicker.js?v={{ assetVersion }}" defer></script>{% endif %}
+{% endblock %}
+
+{% block main %}
+{% set first = service or ('rent' if gown.canRent else ('buy' if gown.canBuy else 'custom')) %}
+<article class="gown">
+  <nav class="gown__crumbs" aria-label="Breadcrumb">
+    <a href="/collection">Collection</a><span aria-hidden="true">/</span>
+    {% if gown.category_name %}<a href="/collection?category={{ gown.category_slug }}">{{ gown.category_name }}</a><span aria-hidden="true">/</span>{% endif %}
+    <span aria-current="page">{{ gown.name }}</span>
+  </nav>
+
+  <div class="gown__images">
+    {% for img in gown.images %}
+    {#- Close-ups are small crops; never enlarge them past their own width. -#}
+    <button type="button" class="{% if img.kind == 'detail' %}gown__image--detail{% endif %}"
+      {% if img.kind == 'detail' and img.displayWidth %}style="max-width: {{ img.displayWidth }}px"{% endif %}
+      data-lightbox="gown" data-src="{{ imgSrc(img.file_key, 2400) }}" data-srcset="{{ img.frameSrcset }}"
+      data-alt="{{ img.alt or gown.name }}" data-caption="{{ img.caption or gown.name }}"
+      aria-label="View photograph {{ loop.index }} of {{ gown.images.length }} larger">
+      {{ m.plate(img, sizes='(min-width: 900px) 56vw, 86vw', alt=gown.name, eager=loop.first) }}
+    </button>
+    {% else %}
+      {{ m.plate(null) }}
+    {% endfor %}
+  </div>
+  {% if gown.images.length > 1 %}<p class="gown__count" aria-hidden="true">{{ gown.images.length }} photographs — swipe</p>{% endif %}
+
+  <div class="gown__panel">
+    <div>
+      <p class="gown__meta">
+        {% if gown.category_name %}<span class="note">{{ gown.category_name }}</span>{% endif %}
+        {% if gown.availability_status != 'available' %}<span class="status status--{{ 'closed' if gown.availability_status in ['sold', 'unavailable'] else 'pending' }}">{{ status.AVAILABILITY[gown.availability_status] }}</span>{% endif %}
+      </p>
+      <h1 class="gown__title">{{ gown.name }}</h1>
+    </div>
+
+    {% if gown.description %}<div class="gown__desc">{{ gown.description | nl2p }}</div>{% endif %}
+
+    {% if gown.sizes or gown.color or gown.design_details or gown.measurementList.length %}
+    <dl class="spec">
+      {% if gown.sizes %}<dt>Size</dt><dd>{{ gown.sizes }}</dd>{% endif %}
+      {% if gown.color %}<dt>Colour</dt><dd>{{ gown.color }}</dd>{% endif %}
+      {% for mm in gown.measurementList %}<dt>{{ mm.label }}</dt><dd>{{ mm.value }}</dd>{% endfor %}
+      {% if gown.design_details %}<dt>Details</dt><dd>{{ gown.design_details }}</dd>{% endif %}
+    </dl>
+    {% endif %}
+
+    {% if user and not isAdmin and not preview %}
+    <form method="post" action="/wishlist/{{ gown.id }}" data-wish>
+      {{ m.csrf() }}<input type="hidden" name="next" value="/gowns/{{ gown.slug }}">
+      <button class="wish" type="submit" aria-pressed="{{ 'true' if wished else 'false' }}">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14s-5.5-3.4-5.5-7.3A3 3 0 0 1 8 4.6a3 3 0 0 1 5.5 2.1C13.5 10.6 8 14 8 14z"/></svg>
+        <span data-wish-label>{{ 'Saved' if wished else 'Save' }}</span>
+      </button>
+    </form>
+    {% endif %}
+
+    {% if gown.canRent or gown.canBuy or gown.canCustom %}
+    <section class="services" data-tabs aria-label="Ways to wear this gown">
+      <div class="services__tabs" role="tablist">
+        {% if gown.canRent %}<button type="button" role="tab" id="tab-rent" aria-controls="panel-rent" data-service="rent" aria-selected="{{ 'true' if first == 'rent' else 'false' }}" tabindex="{{ 0 if first == 'rent' else -1 }}">Rent<span class="note">{{ gown.rental_price | money }}</span></button>{% endif %}
+        {% if gown.canBuy %}<button type="button" role="tab" id="tab-buy" aria-controls="panel-buy" data-service="buy" aria-selected="{{ 'true' if first == 'buy' else 'false' }}" tabindex="{{ 0 if first == 'buy' else -1 }}">Buy<span class="note">{{ gown.purchase_price | money }}</span></button>{% endif %}
+        {% if gown.canCustom %}<button type="button" role="tab" id="tab-custom" aria-controls="panel-custom" data-service="custom" aria-selected="{{ 'true' if first == 'custom' else 'false' }}" tabindex="{{ 0 if first == 'custom' else -1 }}">Commission<span class="note">Quoted</span></button>{% endif %}
+      </div>
+
+      {% if gown.canRent %}
+      <div class="services__panel" role="tabpanel" id="panel-rent" aria-labelledby="tab-rent" {% if first != 'rent' %}hidden{% endif %}>
+        <div class="price">
+          <span class="price__main">{{ gown.rental_price | money }}</span>
+          {% if gown.rental_period_days %}<span class="note">up to {{ gown.rental_period_days }} day{% if gown.rental_period_days > 1 %}s{% endif %}, pickup to return</span>{% endif %}
+          {% if gown.security_deposit %}<span class="note">+ {{ gown.security_deposit | money }} refundable deposit</span>{% endif %}
+        </div>
+        {% if user and not isAdmin and not preview %}
+        <form method="post" action="/gowns/{{ gown.slug }}/rent" novalidate>
+          {{ m.csrf() }}
+          {% if errors.pickup_date or errors.event_date or errors.return_date %}
+            <p class="form-error" role="alert">{{ errors.event_date or errors.pickup_date or errors.return_date }}</p>
+          {% endif %}
+          <div class="datepick" data-datepicker data-gown="{{ gown.id }}" data-period="{{ gown.rental_period_days or '' }}" data-min="{{ minDate }}" data-max="{{ maxDate }}" hidden>
+            <p class="datepick__step" data-step aria-live="polite"></p>
+            <div class="datepick__head">
+              <button type="button" data-prev aria-label="Previous month">‹</button>
+              <span class="datepick__month" data-month aria-live="polite"></span>
+              <button type="button" data-next aria-label="Next month">›</button>
+            </div>
+            <div class="datepick__grid" data-grid></div>
+            <div class="datepick__legend">
+              <span><i style="background: var(--thread)"></i>Event</span>
+              <span><i style="background: var(--ink)"></i>Pickup / return</span>
+              <span><i class="datepick__day is-booked" style="min-height: 0"></i>Unavailable</span>
+            </div>
+            <div class="datepick__summary" data-summary>
+              <div><span class="note">Pickup</span><span data-sum-pickup>—</span></div>
+              <div><span class="note">Event</span><span data-sum-event>—</span></div>
+              <div><span class="note">Return</span><span data-sum-return>—</span></div>
+            </div>
+            <button type="button" class="link-plain datepick__reset" data-reset>Start again</button>
+          </div>
+          <div class="datepick-fallback row" data-datepicker-fallback>
+            {{ m.field('event_date', 'Event date', values, errors, type='date', required=true, attrs='min="' + minDate + '" max="' + maxDate + '"') }}
+            {{ m.field('pickup_date', 'Pickup', values, errors, type='date', required=true, attrs='min="' + minDate + '" max="' + maxDate + '"') }}
+            {{ m.field('return_date', 'Return', values, errors, type='date', required=true, attrs='min="' + minDate + '" max="' + maxDate + '"') }}
+          </div>
+          {% if sizes.length > 1 %}
+          <div class="field">
+            <label for="f-rent-size">Size</label>
+            <select class="select" id="f-rent-size" name="size_note">
+              {% for s in sizes %}<option {% if values.size_note == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+            </select>
+          </div>
+          {% endif %}
+          {{ m.field('customer_note', 'Anything Kyla should know', values, errors, type='textarea', attrs='rows="3" maxlength="2000"') }}
+          {% if gown.terms or site.rental_terms %}
+          <p class="note">Rental terms</p>
+          <div class="terms">{{ gown.terms | nl2p }}{{ site.rental_terms | nl2p }}</div>
+          <label class="check"><input type="checkbox" name="accept_terms" value="1" {% if values.accept_terms %}checked{% endif %}> I’ve read the rental terms.</label>
+          {% if errors.accept_terms %}<p class="error small">{{ errors.accept_terms }}</p>{% endif %}
+          {% endif %}
+          <p class="small muted" style="margin-top: 1rem">This sends a request — nothing is booked or charged until Kyla approves it{% if gown.security_deposit %} and the deposit is received{% endif %}.</p>
+          <button class="btn btn--block" type="submit">Request these dates</button>
+        </form>
+        {% else %}
+        {{ m.signIn('rent', 'to request a rental', gown, preview, isAdmin) }}
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% if gown.canBuy %}
+      <div class="services__panel" role="tabpanel" id="panel-buy" aria-labelledby="tab-buy" {% if first != 'buy' %}hidden{% endif %}>
+        <div class="price"><span class="price__main">{{ gown.purchase_price | money }}</span></div>
+        {% if user and not isAdmin and not preview %}
+        <form method="post" action="/gowns/{{ gown.slug }}/order">
+          {{ m.csrf() }}
+          {% if sizes.length > 1 %}
+          <div class="field">
+            <label for="f-buy-size">Size</label>
+            <select class="select" id="f-buy-size" name="size_note">
+              {% for s in sizes %}<option {% if values.size_note == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+            </select>
+          </div>
+          {% endif %}
+          <fieldset>
+            <legend class="label">Pickup or delivery</legend>
+            <label class="check"><input type="radio" name="fulfillment" value="pickup" {% if values.fulfillment != 'delivery' %}checked{% endif %}> Pick up from the studio</label>
+            <label class="check" style="margin-top: .5rem"><input type="radio" name="fulfillment" value="delivery" {% if values.fulfillment == 'delivery' %}checked{% endif %}> Arrange delivery with Kyla</label>
+          </fieldset>
+          <div data-show-when="fulfillment=delivery" {% if values.fulfillment != 'delivery' %}hidden{% endif %}>
+            {{ m.field('delivery_address', 'Delivery address', { delivery_address: values.delivery_address or user.address }, errors, type='textarea', required=true, attrs='rows="3"') }}
+          </div>
+          {{ m.field('customer_note', 'Message for Kyla', values, errors, type='textarea', attrs='rows="3" maxlength="2000"') }}
+          {% if gown.terms or site.purchase_terms %}
+          <p class="note">Terms</p>
+          <div class="terms">{{ gown.terms | nl2p }}{{ site.purchase_terms | nl2p }}</div>
+          <label class="check"><input type="checkbox" name="accept_terms" value="1"> I’ve read the terms.</label>
+          {% if errors.accept_terms %}<p class="error small">{{ errors.accept_terms }}</p>{% endif %}
+          {% endif %}
+          <p class="small muted" style="margin-top: 1rem">This is an order inquiry. No payment is taken on this website — Kyla confirms availability and sends payment details directly.</p>
+          <button class="btn btn--block" type="submit">Send order inquiry</button>
+        </form>
+        {% else %}
+        {{ m.signIn('buy', 'to send an order inquiry', gown, preview, isAdmin) }}
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% if gown.canCustom %}
+      <div class="services__panel" role="tabpanel" id="panel-custom" aria-labelledby="tab-custom" {% if first != 'custom' %}hidden{% endif %}>
+        <p>Have this gown made for you — in your measurements, or with changes to colour, fabric or detail. Kyla replies with a quotation before any work begins.</p>
+        <a class="btn btn--ghost btn--block" href="/commission?gown={{ gown.slug }}">Request a version of this gown</a>
+      </div>
+      {% endif %}
+    </section>
+    {% elif not preview %}
+    <p class="muted">This gown isn’t currently available to rent or buy.</p>
+    {% endif %}
+
+    {% if gown.care_instructions %}
+    <details class="ask">
+      <summary class="link">Care <span class="arrow">+</span></summary>
+      <div class="small" style="padding-top: .8rem">{{ gown.care_instructions | nl2p }}</div>
+    </details>
+    {% endif %}
+
+    {% if not isAdmin and not preview %}
+    <details class="ask" id="ask" {% if flash and flash.type == 'error' %}open{% endif %}>
+      <summary class="link">Ask Kyla about this gown <span class="arrow">→</span></summary>
+      {% if user %}
+      <form method="post" action="/gowns/{{ gown.slug }}/ask">
+        {{ m.csrf() }}
+        <label class="visually-hidden" for="ask-body">Your question</label>
+        <textarea class="textarea" id="ask-body" name="body" rows="3" maxlength="4000" required placeholder="Your question…"></textarea>
+        <button class="btn btn--small" type="submit">Send</button>
+      </form>
+      {% else %}
+      <p class="small" style="padding-top: .8rem"><a href="/login?next=/gowns/{{ gown.slug }}">Sign in</a> to message Kyla here{% if site.facebook_url %}, or write on <a href="{{ site.facebook_url }}" rel="noopener" target="_blank">Facebook</a>{% endif %}.</p>
+      {% endif %}
+    </details>
+    {% endif %}
+  </div>
+</article>
+
+{% if related.length %}
+<section class="related" aria-labelledby="rel-h">
+  <hr class="rule rule--ink">
+  <h2 class="h3" id="rel-h" style="margin-top: 1.4rem">Also in <em>{{ gown.category_name }}</em></h2>
+  <ul class="related__list" role="list">
+    {% for g in related %}
+    <li class="look"><a class="look__link" href="/gowns/{{ g.slug }}">
+      {{ m.plate(g.main, sizes='(min-width: 900px) 28vw, 90vw', alt=g.name) }}
+      <span class="look__cap"><span class="note">{{ loop.index | pad }}</span><span class="look__name">{{ g.name }}</span></span>
+    </a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,8 @@
+node_modules
+.env
+.venv-rembg
+content/incoming/
+content/processed/
+*.log
+.git
+test/

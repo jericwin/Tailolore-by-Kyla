@@ -1,0 +1,17 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}{{ thread.customer }} · Messages{% endblock %}
+
+{% block main %}
+<header class="s-head">
+  <div><p class="note"><a href="/studio/messages">Messages</a> / {{ thread.subject_label }}</p><h1>{{ thread.customer }}</h1></div>
+  <div class="s-head__actions">
+    {% if subjectLink %}<a class="btn btn--ghost btn--small" href="{{ subjectLink }}">Open {{ 'gown' if thread.subject_type == 'gown' else 'request' }}</a>{% endif %}
+    <a class="link" href="/studio/customers/{{ thread.customer_id }}">Customer</a>
+  </div>
+</header>
+<div class="s-body" style="max-width: 52rem">
+  <p class="small muted"><a href="mailto:{{ thread.customer_email }}">{{ thread.customer_email }}</a>{% if thread.customer_phone %} · {{ thread.customer_phone }}{% endif %}</p>
+  {{ m.conversation({ messages: messages }, '/studio/messages/' + thread.id, user, csrfToken, 'Reply to ' + thread.customer) }}
+</div>
+{% endblock %}

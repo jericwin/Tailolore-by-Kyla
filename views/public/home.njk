@@ -1,0 +1,213 @@
+{% extends "layouts/site.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}{{ site.brand_name }}{% if site.location %} · {{ site.location }}{% endif %}{% endblock %}
+{% block headerClass %}masthead--over{% endblock %}
+{% block bodyClass %}page-home{% endblock %}
+{% block scripts %}<script src="/static/js/home-motion.js?v={{ assetVersion }}" defer></script>{% endblock %}
+{% block ogImage %}{% if leadImage %}{{ leadImage.src }}{% else %}/static/img/brand/og-card.jpg{% endif %}{% endblock %}
+
+{% block main %}
+{#- The cover: the masterpiece, cut out and standing on ink. -#}
+{% set img = cover %}
+{% set coverDark = (not img) or (not img.useCut) or img.backdrop == 'ink' or img.backdrop == 'moss' %}
+<section class="cover {% if not img %}cover--empty{% elif img.useCut %}cover--cut bd-{{ img.backdrop }}{% else %}cover--frame{% endif %} {% if coverDark %}is-dark{% endif %}" aria-labelledby="cover-title">
+  <div class="cover__tape" aria-hidden="true"></div>
+
+  <h1 class="cover__title" id="cover-title">
+    <span class="cover__word reveal-type" data-split>Tailored</span>
+    <span class="cover__by reveal-type"><em>by</em> Kyla</span>
+  </h1>
+
+  {#- A tailor's thread, sewn across the cover behind the gown as the page opens. -#}
+  <svg class="cover__thread" viewBox="0 0 1440 1000" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <defs>
+      <mask id="thread-sew" maskUnits="userSpaceOnUse" x="-100" y="0" width="1640" height="1000">
+        <path class="cover__thread-draw" pathLength="1" d="M-40 690 C 180 560, 330 800, 560 700 S 900 420, 1120 560 S 1380 760, 1480 640"/>
+      </mask>
+    </defs>
+    <path class="cover__thread-stitch" mask="url(#thread-sew)" d="M-40 690 C 180 560, 330 800, 560 700 S 900 420, 1120 560 S 1380 760, 1480 640"/>
+  </svg>
+
+  {% if img %}
+  <a class="cover__figure reveal-figure" href="/gowns/{{ lead.slug }}" aria-label="{{ lead.name }}">
+    {{ m.plate(img, sizes='(min-width: 900px) 46vw, 88vw', alt=lead.name, eager=true) }}
+  </a>
+  {% else %}
+  <div class="cover__figure cover__figure--mark reveal-figure" aria-hidden="true">
+    <img src="/static/img/brand/monogram-ivory.png" alt="" width="400" height="333">
+  </div>
+  {% endif %}
+
+  <div class="cover__lines">
+    <p class="note">No. 01{% if site.location %} — {{ site.location }}{% endif %}</p>
+    {% if site.hero_line %}<p class="cover__line">{{ site.hero_line }}</p>{% endif %}
+    <p class="eyebrow">To rent · To buy · Made to order</p>
+  </div>
+
+  <div class="cover__caption">
+    {% if lead %}
+      <span class="note">Pl. 01</span>
+      <a href="/gowns/{{ lead.slug }}"><span class="serif">{{ lead.name }}</span>{% if lead.category_name %}<span class="note"> — {{ lead.category_name }}</span>{% endif %}</a>
+    {% else %}
+      <span class="note">The collection is being photographed</span>
+    {% endif %}
+  </div>
+
+  <a class="cover__next note" href="{{ '#masterpiece' if lead else '#collections' }}">The collection <span aria-hidden="true">↓</span></a>
+</section>
+
+{% if lead %}
+{#- The masterpiece, studied: the whole gown on the studio canvas, with one close-up laid over it. -#}
+<section class="masterpiece" id="masterpiece" aria-labelledby="mp-title">
+  <div class="masterpiece__plate reveal">
+    <a href="/gowns/{{ lead.slug }}" tabindex="-1" aria-hidden="true">
+      {{ m.plate(leadImage, sizes='(min-width: 900px) 52vw, 92vw', alt=lead.name) }}
+    </a>
+  </div>
+  {% if leadDetail %}
+  <figure class="masterpiece__detail reveal">
+    {{ m.plate(leadDetail, sizes='(min-width: 900px) 18vw, 44vw', alt=leadDetail.caption or ('Detail of the ' + lead.name)) }}
+    {% if leadDetail.caption %}<figcaption class="note">{{ leadDetail.caption }}</figcaption>{% endif %}
+  </figure>
+  {% endif %}
+  <div class="masterpiece__text">
+    <p class="note">§ 01 — The masterpiece</p>
+    <h2 class="masterpiece__name reveal-words" id="mp-title">
+      {%- set words = lead.name.split(' ') -%}
+      {%- for w in words %}<span class="w{% if loop.last and words.length > 1 %} masterpiece__last{% endif %}" style="--i: {{ loop.index0 }}"><span>{{ w }}</span></span>{% if not loop.last %} {% endif %}{% endfor -%}
+    </h2>
+    {% if lead.category_name %}<p class="eyebrow">{{ lead.category_name }}</p>{% endif %}
+    {% if lead.note %}<p class="masterpiece__note">{{ lead.note }}</p>
+    {% elif lead.description %}<p class="masterpiece__note">{{ lead.description | truncate(220) }}</p>{% endif %}
+    {% set svc = m.services(lead) | trim %}
+    {% if svc %}<p class="note">{{ svc }}</p>{% endif %}
+    <a class="link" href="/gowns/{{ lead.slug }}">See the {{ 'gown' if lead.category_section == 'gowns' or not lead.category_section else 'piece' }} <span class="arrow">→</span></a>
+  </div>
+</section>
+{% endif %}
+
+{% if plates.length %}
+<section class="signature" id="signature" aria-labelledby="sig-title">
+  <header class="section-head">
+    <p class="note">§ 02</p>
+    <h2 class="h2" id="sig-title">Signature <em>pieces</em></h2>
+    <p class="section-head__aside muted">Chosen by Kyla from the collection.</p>
+  </header>
+  <ol class="signature__grid" role="list">
+    {% for p in plates %}
+    <li class="sig sig--p{{ loop.index0 }} sig--{{ p.type }} reveal">
+      <a class="sig__link" href="/gowns/{{ p.gown.slug }}">
+        {% if p.type == 'gown' %}
+          {{ m.plate(p.image, sizes='(min-width: 900px) 40vw, (min-width: 600px) 60vw, 88vw', alt=p.gown.name) }}
+          <span class="sig__cap">
+            <span class="note">Pl. {{ p.no | pad }}</span>
+            <span class="sig__name">{{ p.gown.name }}</span>
+            {% if p.gown.category_name %}<span class="eyebrow">{{ p.gown.category_name }}</span>{% endif %}
+            {% if p.gown.note %}<span class="sig__note">{{ p.gown.note }}</span>{% endif %}
+          </span>
+        {% else %}
+          {{ m.plate(p.image, sizes='(min-width: 900px) 20vw, 60vw', alt=p.image.caption or ('Detail of the ' + p.gown.name)) }}
+          <span class="sig__cap sig__cap--detail">
+            <span class="note">Detail</span>
+            <span class="small">{{ p.image.caption or p.gown.name }}<span class="muted"> — {{ p.gown.name }}</span></span>
+          </span>
+        {% endif %}
+      </a>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endif %}
+
+{% if sections.length %}
+{#- Explore by collection: a contents page rather than a row of cards. -#}
+<section class="contents" id="collections" aria-labelledby="ct-title">
+  <header class="contents__head">
+    <p class="note">§ 03</p>
+    <h2 class="h2" id="ct-title">Explore <em>by collection</em></h2>
+  </header>
+  <ol class="contents__list" role="list">
+    {% for s in sections %}
+    <li class="contents__row reveal">
+      <a href="/collection?section={{ s.key }}">
+        <span class="note contents__num">{{ ['i.', 'ii.', 'iii.', 'iv.'][loop.index0] }}</span>
+        <span class="contents__word">{{ s.label }}</span>
+        <span class="contents__line">{% if s.line %}{{ s.line }}{% endif %}<span class="note"> {{ s.count }} piece{% if s.count != 1 %}s{% endif %}</span></span>
+        <span class="contents__thumbs" aria-hidden="true">
+          {% for im in s.images %}<img src="{{ im.src }}" width="{{ im.displayWidth }}" height="{{ im.displayHeight }}" alt="" loading="lazy" decoding="async">{% endfor %}
+        </span>
+        <span class="contents__arrow" aria-hidden="true">→</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endif %}
+
+<section class="discover" aria-labelledby="dc-title">
+  {% if names.length > 1 %}
+  {#- A slow ribbon of every piece's name; decoration only, the list itself is one click away. -#}
+  <div class="ribbon" aria-hidden="true">
+    <div class="ribbon__track">
+      {% for copy in [1, 2] %}<span class="ribbon__set">{% for n in names %}<span class="ribbon__name">{{ n }}</span><span class="ribbon__stitch"></span>{% endfor %}</span>{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  {% if totalGowns %}
+  <p class="note">§ 04</p>
+  <h2 class="discover__word" id="dc-title"><a href="/collection">See <em>all {{ totalGowns }}</em> pieces <span class="arrow" aria-hidden="true">→</span></a></h2>
+  <p class="discover__more"><a class="link" href="/gallery">Or browse every photograph in the gallery <span class="arrow">→</span></a></p>
+  {% else %}
+  <h2 class="discover__word" id="dc-title">The first pieces are being photographed.</h2>
+  <p class="discover__more">In the meantime, the latest are on {% if site.facebook_url %}<a href="{{ site.facebook_url }}" rel="noopener" target="_blank">Kyla’s Facebook page</a>{% else %}Kyla’s Facebook page{% endif %}, or you can <a href="/commission">request a gown made for you</a>.</p>
+  {% endif %}
+</section>
+
+<section class="atelier-note" aria-labelledby="at-title">
+  <div class="atelier-note__mark" aria-hidden="true">
+    <img src="/static/img/brand/monogram-ink.png" alt="" width="400" height="333" loading="lazy">
+  </div>
+  <div class="atelier-note__text reveal">
+    <p class="note">§ 05 — The atelier</p>
+    <h2 class="h2" id="at-title">{% if site.about_heading %}{{ site.about_heading }}{% else %}{{ site.brand_name }}{% endif %}</h2>
+    {% if site.about_text %}
+      <div class="lede">{{ site.about_text | nl2p }}</div>
+    {% else %}
+      <p class="lede">Gowns to rent, to buy, and made to order{% if site.location %} — from {{ site.location }}{% endif %}.</p>
+    {% endif %}
+    <a class="link" href="/atelier">The atelier <span class="arrow">→</span></a>
+  </div>
+</section>
+
+<section class="ways" aria-labelledby="ways-title">
+  <h2 class="visually-hidden" id="ways-title">How to wear a Tailored by Kyla gown</h2>
+  <ol class="ways__list" role="list">
+    <li><a href="/collection?service=rent">
+      <span class="note">i.</span><span class="ways__word">Rent</span>
+      <span class="ways__text">Choose your event date. Kyla reviews every request before the dates are held.</span>
+      <span class="ways__arrow" aria-hidden="true">→</span></a></li>
+    <li><a href="/collection?service=buy">
+      <span class="note">ii.</span><span class="ways__word">Buy</span>
+      <span class="ways__text">Ask for a gown to keep. Kyla confirms availability and payment with you directly.</span>
+      <span class="ways__arrow" aria-hidden="true">→</span></a></li>
+    <li><a href="/commission">
+      <span class="note">iii.</span><span class="ways__word">Commission</span>
+      <span class="ways__text">Describe the gown you imagine. You’ll receive a quotation before anything begins.</span>
+      <span class="ways__arrow" aria-hidden="true">→</span></a></li>
+  </ol>
+</section>
+
+<section class="write" aria-labelledby="write-title">
+  <p class="note">Enquiries</p>
+  <h2 class="h2" id="write-title">Ask Kyla <em>about a gown.</em></h2>
+  <div class="write__ways">
+    {% if user and not isAdmin %}
+      <a class="btn" href="/account/messages">Write a message</a>
+    {% elif not user %}
+      <a class="btn" href="/register">Create an account to enquire</a>
+    {% endif %}
+    {% if site.messenger_url %}<a class="link" href="{{ site.messenger_url }}" rel="noopener" target="_blank">Messenger <span class="arrow">↗</span></a>{% endif %}
+    {% if site.facebook_url %}<a class="link" href="{{ site.facebook_url }}" rel="noopener" target="_blank">Facebook <span class="arrow">↗</span></a>{% endif %}
+  </div>
+</section>
+{% endblock %}

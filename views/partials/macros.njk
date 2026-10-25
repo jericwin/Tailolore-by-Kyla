@@ -1,0 +1,127 @@
+{#- A gown photograph, presented as a full frame or as a cut-out on a backdrop.
+    The frame always keeps the photograph's own proportions, so a gown is never cropped. -#}
+{% macro plate(img, sizes='(min-width: 900px) 40vw, 92vw', alt='', eager=false, cls='') %}
+{% if img %}
+  {% if img.useCut %}
+  <div class="plate plate--cut bd-{{ img.backdrop }} {{ cls }}" style="--ratio: {{ img.displayWidth }} / {{ img.displayHeight }}">
+    <span class="plate__floor" aria-hidden="true"></span>
+    <img src="{{ img.src }}" srcset="{{ img.srcset }}" sizes="{{ sizes }}" width="{{ img.displayWidth }}" height="{{ img.displayHeight }}"
+         alt="{{ img.alt or alt }}" {% if eager %}fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async">
+  </div>
+  {% else %}
+  <div class="plate plate--frame {{ cls }}" style="--ratio: {{ img.displayWidth or 3 }} / {{ img.displayHeight or 4 }}">
+    <img src="{{ img.src }}" srcset="{{ img.srcset }}" sizes="{{ sizes }}" width="{{ img.displayWidth }}" height="{{ img.displayHeight }}"
+         alt="{{ img.alt or alt }}" {% if eager %}fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async">
+  </div>
+  {% endif %}
+{% else %}
+  <div class="plate plate--empty {{ cls }}" role="img" aria-label="Photograph to come">
+    <img src="/static/img/brand/monogram-ink.png" alt="" width="120" height="100" loading="lazy">
+    <span class="note">Photograph to come</span>
+  </div>
+{% endif %}
+{% endmacro %}
+
+{% macro services(g) -%}
+{%- set out = '' -%}
+{%- if g.offer_rental and g.rental_price != null %}{% set out = 'To rent' %}{% endif -%}
+{%- if g.offer_purchase and g.purchase_price != null %}{% set out = out + (' · ' if out else '') + 'To buy' %}{% endif -%}
+{%- if g.offer_custom %}{% set out = out + (' · ' if out else '') + 'Made to order' %}{% endif -%}
+{{ out }}
+{%- endmacro %}
+
+{% macro statusMark(map, key) -%}
+<span class="status status--{{ map[key].tone }}">{{ map[key].label }}</span>
+{%- endmacro %}
+
+{% macro field(name, label, values, errors, type='text', hint='', required=false, attrs='', cls='') %}
+<div class="field {{ cls }}">
+  <label for="f-{{ name }}">{{ label }}{% if not required %} <span class="muted">(optional)</span>{% endif %}</label>
+  {% if type == 'textarea' %}
+  <textarea class="textarea" id="f-{{ name }}" name="{{ name }}" {% if required %}required{% endif %} {% if errors[name] %}aria-invalid="true" aria-describedby="e-{{ name }}"{% elif hint %}aria-describedby="h-{{ name }}"{% endif %} {{ attrs | safe }}>{{ values[name] }}</textarea>
+  {% else %}
+  <input class="input" id="f-{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ values[name] }}" {% if required %}required{% endif %} {% if errors[name] %}aria-invalid="true" aria-describedby="e-{{ name }}"{% elif hint %}aria-describedby="h-{{ name }}"{% endif %} {{ attrs | safe }}>
+  {% endif %}
+  {% if hint %}<span class="hint" id="h-{{ name }}">{{ hint }}</span>{% endif %}
+  {% if errors[name] %}<span class="error" id="e-{{ name }}">{{ errors[name] }}</span>{% endif %}
+</div>
+{% endmacro %}
+
+{#- Compact field used in the studio: no "(optional)" suffix, hint and error below. -#}
+{% macro box(name, label, values, errors, type='text', hint='', attrs='') %}
+<div class="field">
+  <label for="f-{{ name }}">{{ label }}</label>
+  {% if type == 'textarea' %}
+  <textarea class="textarea" id="f-{{ name }}" name="{{ name }}" {% if errors[name] %}aria-invalid="true"{% endif %} {{ attrs | safe }}>{{ values[name] }}</textarea>
+  {% else %}
+  <input class="input" id="f-{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ values[name] }}" {% if errors[name] %}aria-invalid="true"{% endif %} {{ attrs | safe }}>
+  {% endif %}
+  {% if hint %}<span class="hint">{{ hint }}</span>{% endif %}
+  {% if errors[name] %}<span class="error">{{ errors[name] }}</span>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro csrf() %}<input type="hidden" name="_csrf" value="{{ csrfToken }}">{% endmacro %}
+
+{#- Conversation attached to a request; action is where replies are posted. -#}
+{% macro conversation(thread, action, me, csrfToken, prompt='Write to Kyla') %}
+<section class="conversation" id="messages" aria-labelledby="conv-h">
+  <h2 class="eyebrow" id="conv-h">Messages</h2>
+  {% if thread and thread.messages.length %}
+  <ol class="conversation__list">
+    {% for m in thread.messages %}
+    <li class="msg {% if m.sender_id == me.id %}msg--mine{% endif %}" {% if loop.last %}id="latest"{% endif %}>
+      <span class="note">{{ m.sender_name }}{% if m.sender_role == 'admin' %} · Studio{% endif %} — {{ m.created_at | stamp }}</span>
+      <div class="msg__body">{{ m.body | nl2p }}</div>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="muted small">No messages yet.</p>
+  {% endif %}
+  <form method="post" action="{{ action }}" class="conversation__form">
+    <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+    <label class="visually-hidden" for="msg-body">{{ prompt }}</label>
+    <textarea class="textarea" id="msg-body" name="body" rows="3" maxlength="4000" placeholder="{{ prompt }}…" required></textarea>
+    <button class="btn btn--small" type="submit">Send</button>
+  </form>
+</section>
+{% endmacro %}
+
+{% macro signIn(service, purpose, gown, preview, isAdmin) %}
+<div class="signin-note">
+  {% if preview %}
+    <p class="small muted">Customers see the request form here.</p>
+  {% elif isAdmin %}
+    <p class="small muted">You’re signed in as the studio. Customers see the request form here.</p>
+  {% else %}
+    <p class="small">Sign in or create an account {{ purpose }}. You’ll be able to follow its status and message Kyla.</p>
+    <a class="btn btn--block" href="/login?next={{ ('/gowns/' + gown.slug + '?service=' + service) | urlencode }}">Sign in</a>
+    <a class="link" href="/register?next={{ ('/gowns/' + gown.slug + '?service=' + service) | urlencode }}">Create an account <span class="arrow">→</span></a>
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% macro timeline(events, map) %}
+<ol class="timeline">
+  {% for e in events %}
+  <li>
+    <span class="note">{{ e.created_at | stamp }}</span>
+    <span>{% if e.from_status != e.to_status and map[e.to_status] %}{{ map[e.to_status].label }}{% else %}Update{% endif %}{% if e.note %} — <span class="muted">{{ e.note }}</span>{% endif %}</span>
+    {% if e.actor_name %}<span class="note">{{ e.actor_name }}{% if e.actor_role == 'admin' %} · studio{% endif %}</span>{% endif %}
+  </li>
+  {% endfor %}
+</ol>
+{% endmacro %}
+
+{#- A request's progress, step by step, for customers. -#}
+{% macro progress(kind, statusKey) %}
+{% set steps = status.progress(kind, statusKey) %}
+{% if steps %}
+<ol class="progress" aria-label="Progress">
+  {% for s in steps %}
+  <li class="progress__step is-{{ s.state }}" {% if s.state == 'current' %}aria-current="step"{% endif %}><span class="progress__label">{{ s.label }}</span></li>
+  {% endfor %}
+</ol>
+{% endif %}
+{% endmacro %}

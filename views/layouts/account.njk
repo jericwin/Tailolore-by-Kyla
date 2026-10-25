@@ -1,0 +1,42 @@
+{% extends "layouts/site.njk" %}
+{% block pageStyles %}<link rel="stylesheet" href="/static/css/app.css?v={{ assetVersion }}">{% endblock %}
+{% block bodyClass %}area-account{% endblock %}
+
+{% block main %}
+{% set c = acctCounts or {} %}
+<div class="acct">
+  <nav class="acct__nav" aria-label="Your account">
+    <div class="acct__me">
+      <span class="acct__initial" aria-hidden="true">{{ user.fullName | first | upper }}</span>
+      <span class="acct__who">
+        <span class="acct__hello">{{ user.fullName }}</span>
+        <span class="acct__email">{{ user.email }}</span>
+      </span>
+    </div>
+    <ul data-acct-nav>
+      {% for key, label, href, count in [
+        ['overview', 'Overview', '/account', null],
+        ['rentals', 'My rentals', '/account/rentals', c.rentals],
+        ['orders', 'My purchases', '/account/orders', c.orders],
+        ['custom', 'Custom orders', '/account/custom', c.custom],
+        ['messages', 'Messages', '/account/messages', c.messages],
+        ['wishlist', 'Wishlist', '/account/wishlist', c.wishlist],
+        ['notifications', 'Notifications', '/account/notifications', unread],
+        ['settings', 'Account settings', '/account/settings', null]
+      ] %}
+      <li><a href="{{ href }}" {% if section == key %}aria-current="page"{% endif %}>
+        <span class="acct__label">{{ label }}</span>
+        {% if count %}<span class="acct__count {% if key in ['messages', 'notifications'] %}is-new{% endif %}">{{ count }}<span class="visually-hidden"> {{ { messages: 'unread', notifications: 'unread', wishlist: 'saved' }[key] or 'in progress' }}</span></span>{% endif %}
+      </a></li>
+      {% endfor %}
+    </ul>
+    <div class="acct__foot">
+      <a class="acct__shop" href="/collection">Browse gowns <span aria-hidden="true">→</span></a>
+      <form class="acct__signout" method="post" action="/logout"><input type="hidden" name="_csrf" value="{{ csrfToken }}"><button type="submit">Sign out</button></form>
+    </div>
+  </nav>
+  <div class="acct__body">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "layouts/account.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Messages · {{ site.brand_name }}{% endblock %}
+
+{% block content %}
+<header class="acct__head"><p class="note">Messages</p><h1 class="h1">Conversations</h1></header>
+{% if threads.length %}
+<ul class="ledger" role="list">
+  {% for t in threads %}
+  <li><a href="/account/messages/{{ t.id }}" class="ledger__row {% if t.customer_unread %}is-unread{% endif %}">
+    <span class="ledger__main">
+      <span class="ledger__title">{{ t.subject_label }}</span>
+      <span class="small muted ledger__excerpt">{{ t.last_body | truncate(110) }}</span>
+    </span>
+    <span class="note">{% if t.customer_unread %}<span class="dot">{{ t.customer_unread }}</span> {% endif %}{{ t.last_message_at | stamp }}</span>
+  </a></li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="muted">No conversations yet.</p>
+{% endif %}
+
+<section class="acct__block" style="margin-top: 3rem; max-width: 40rem">
+  <h2 class="acct__h">New message to Kyla</h2>
+  <form method="post" action="/account/messages" class="stack">
+    {{ m.csrf() }}
+    <label class="visually-hidden" for="new-msg">Message</label>
+    <textarea class="textarea" id="new-msg" name="body" rows="4" maxlength="4000" required placeholder="Your question…"></textarea>
+    <button class="btn btn--small" type="submit">Send</button>
+  </form>
+  <p class="small muted">To ask about a particular gown or request, use the message box on its page so Kyla sees the context.</p>
+</section>
+{% endblock %}

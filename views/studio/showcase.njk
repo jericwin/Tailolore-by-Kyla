@@ -1,0 +1,90 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Homepage showcase · Studio{% endblock %}
+
+{#- One showcase entry: its picture, which photograph to show, a note, and its place. -#}
+{% macro entry(e, isLead, first, last) %}
+{% set g = e.gown %}
+{% set shown = e.shown %}
+<li class="sc {% if isLead %}sc--lead{% endif %}" id="sc-{{ g.id }}">
+  <a class="sc__thumb" href="/studio/gowns/{{ g.id }}">{% if shown %}<img src="{{ shown.src }}" alt="" loading="lazy">{% endif %}</a>
+  <div class="sc__body">
+    <p class="note">{% if isLead %}The masterpiece{% else %}Signature · {{ e.position }}{% endif %}{% if g.listing_status != 'published' %} · <span class="status status--pending">Not published — hidden</span>{% endif %}</p>
+    <h2 class="sc__name"><a href="/studio/gowns/{{ g.id }}">{{ g.name }}</a></h2>
+    <form method="post" action="/studio/showcase/{{ g.id }}" class="boxed sc__form">
+      {{ m.csrf() }}
+      {% if g.images.length > 1 %}
+      <div class="field"><label for="sci-{{ g.id }}">Photograph</label>
+        <select class="select" id="sci-{{ g.id }}" name="image_id">
+          <option value="">Main photograph</option>
+          {% for i in g.images %}<option value="{{ i.id }}" {% if e.image_id == i.id %}selected{% endif %}>{{ loop.index }}. {{ i.caption or ({ look: 'Full look', detail: 'Detail', atelier: 'Atelier' }[i.kind]) }}{% if i.variant == 'studio' %} — studio{% endif %}</option>{% endfor %}
+        </select></div>
+      {% endif %}
+      <div class="field"><label for="scn-{{ g.id }}">Line shown with it <span class="muted">(optional)</span></label>
+        <input class="input" id="scn-{{ g.id }}" name="note" value="{{ e.note }}" maxlength="240" placeholder="A short line shown with the gown"></div>
+      <button class="btn btn--small btn--ghost" type="submit" name="action" value="save">Save</button>
+    </form>
+    <div class="photo__tools">
+      {% if not isLead %}
+        <form method="post" action="/studio/showcase/{{ g.id }}">{{ m.csrf() }}
+          <button class="link-plain small" type="submit" name="action" value="up" {% if first %}disabled{% endif %}>↑ Earlier</button>
+          <button class="link-plain small" type="submit" name="action" value="down" {% if last %}disabled{% endif %}>↓ Later</button>
+          <button class="link-plain small" type="submit" name="action" value="masterpiece">Make the masterpiece</button>
+        </form>
+      {% else %}
+        <form method="post" action="/studio/showcase/{{ g.id }}">{{ m.csrf() }}<button class="link-plain small" type="submit" name="action" value="signature">Move to signature pieces</button></form>
+      {% endif %}
+      <form method="post" action="/studio/showcase/{{ g.id }}" style="margin-left: auto">{{ m.csrf() }}<button class="link-plain small" type="submit" name="action" value="remove">Remove from homepage</button></form>
+    </div>
+  </div>
+</li>
+{% endmacro %}
+
+{% block main %}
+<header class="s-head">
+  <div><p class="note">Website</p><h1>Homepage showcase</h1></div>
+  <div class="s-head__actions"><a class="btn btn--small btn--ghost" href="/" target="_blank" rel="noopener">View homepage ↗</a></div>
+</header>
+<div class="s-body" style="max-width: 64rem">
+  <p class="small muted" style="max-width: 62ch">The masterpiece opens the website and has its own spread; signature pieces follow in the order below, with close-ups from their listings woven in. Only published gowns appear. The full collection and gallery always show every published gown.</p>
+
+  <section class="s-section">
+    <h2>The masterpiece</h2>
+    {% if masterpiece %}
+    <ul class="sc-list" role="list">{{ entry(masterpiece, true, true, true) }}</ul>
+    {% else %}
+    <p class="empty">No masterpiece chosen — the first gown with a photograph opens the site. Choose one below or from a signature piece.</p>
+    {% endif %}
+  </section>
+
+  <section class="s-section">
+    <h2>Signature pieces <span class="note">{{ signature.length }}</span></h2>
+    {% if signature.length %}
+    <ul class="sc-list" role="list">
+      {% for e in signature %}{{ entry(e, false, loop.first, loop.last) }}{% endfor %}
+    </ul>
+    {% if signature.length > 8 %}<p class="small warn">The homepage shows the first 8.</p>{% endif %}
+    {% else %}
+    <p class="empty">No signature pieces yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="s-section">
+    <h2>Add a gown</h2>
+    {% if candidates.length %}
+    <form method="post" action="/studio/showcase/add" class="inline-form boxed">
+      {{ m.csrf() }}
+      <div class="field"><label for="sc-add">Published gown</label>
+        <select class="select" id="sc-add" name="gown_id" required>
+          {% for g in candidates %}<option value="{{ g.id }}">{{ g.name }}{% if g.category_name %} — {{ g.category_name }}{% endif %}</option>{% endfor %}
+        </select></div>
+      <div class="field"><label for="sc-role">As</label>
+        <select class="select" id="sc-role" name="role"><option value="signature">Signature piece</option><option value="masterpiece">The masterpiece</option></select></div>
+      <button class="btn btn--small" type="submit">Add</button>
+    </form>
+    {% else %}
+    <p class="small muted">Every published gown with a photograph is already in the showcase.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "layouts/base.njk" %}
+{% block styles %}<link rel="stylesheet" href="/static/css/site.css?v={{ assetVersion }}">{% block pageStyles %}{% endblock %}{% endblock %}
+
+{% block body %}
+{% if preview %}
+<div class="preview-bar">
+  <span class="note">Preview · {{ status.LISTING[gown.listing_status] }} — only you can see this page</span>
+  <a class="link" href="/studio/gowns/{{ gown.id }}">Back to the listing <span class="arrow">→</span></a>
+</div>
+{% endif %}
+<header class="masthead {% block headerClass %}{% endblock %}" data-header>
+  <a class="masthead__mark" href="/" aria-label="{{ site.brand_name }} — home">
+    <img class="mark--ink" src="/static/img/brand/monogram-ink.png" alt="" width="62" height="52">
+    <img class="mark--ivory" src="/static/img/brand/monogram-ivory.png" alt="" width="62" height="52">
+  </a>
+  <nav class="masthead__nav" aria-label="Main">
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" data-menu-toggle>
+      <span class="menu-toggle__label">Menu</span><span class="menu-toggle__lines" aria-hidden="true"></span>
+    </button>
+    <div class="menu" id="site-menu" data-menu>
+      <ul class="menu__primary">
+        <li><a href="/collection" {% if path.startsWith('/collection') or path.startsWith('/gowns') %}aria-current="page"{% endif %}><span class="note">01</span>Collection</a></li>
+        <li><a href="/gallery" {% if path == '/gallery' %}aria-current="page"{% endif %}><span class="note">02</span>Gallery</a></li>
+        <li><a href="/commission" {% if path == '/commission' %}aria-current="page"{% endif %}><span class="note">03</span>Commission</a></li>
+        <li><a href="/atelier" {% if path == '/atelier' %}aria-current="page"{% endif %}><span class="note">04</span>Atelier</a></li>
+      </ul>
+      <ul class="menu__account">
+        {% if user and isAdmin %}
+          <li><a href="/studio">Studio</a></li>
+        {% elif user %}
+          <li><a href="/account/wishlist">Wishlist</a></li>
+          <li><a href="/account" {% if path.startsWith('/account') %}aria-current="page"{% endif %}>Account{% if unread %} <span class="dot" aria-label="{{ unread }} unread">{{ unread }}</span>{% endif %}</a></li>
+        {% else %}
+          <li><a href="/login{% if path != '/' and path != '/login' %}?next={{ path | urlencode }}{% endif %}">Sign in</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+</header>
+
+{% if flash %}
+<div class="flash {% if flash.type == 'error' %}flash--error{% endif %}" role="status" data-flash>
+  <span>{{ flash.message }}</span><button type="button" aria-label="Dismiss" data-dismiss>×</button>
+</div>
+{% endif %}
+
+<main id="main" class="{% block mainClass %}{% endblock %}">
+{% block main %}{% endblock %}
+</main>
+
+<footer class="colophon">
+  <div class="colophon__mark">
+    <img src="/static/img/brand/wordmark-ink.png" alt="{{ site.brand_name }}" width="300" height="68" loading="lazy">
+  </div>
+  <dl class="colophon__facts">
+    {% if site.location %}<div><dt class="note">Studio</dt><dd>{{ site.location }}</dd></div>{% endif %}
+    {% if site.studio_hours %}<div><dt class="note">Hours</dt><dd>{{ site.studio_hours }}</dd></div>{% endif %}
+    <div><dt class="note">Write</dt><dd>
+      {% if site.facebook_url %}<a href="{{ site.facebook_url }}" rel="noopener" target="_blank">Facebook</a>{% endif %}
+      {% if site.instagram_url %}<br><a href="{{ site.instagram_url }}" rel="noopener" target="_blank">Instagram</a>{% endif %}
+      {% if site.contact_email %}<br><a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>{% endif %}
+      {% if site.contact_phone %}<br><a href="tel:{{ site.contact_phone | replace(' ', '') }}">{{ site.contact_phone }}</a>{% endif %}
+    </dd></div>
+    <div><dt class="note">Index</dt><dd>
+      <a href="/collection">Collection</a><br><a href="/gallery">Gallery</a><br><a href="/commission">Commission</a><br><a href="/atelier">Atelier</a>
+    </dd></div>
+  </dl>
+  <p class="colophon__line note">© {{ today().slice(0, 4) }} {{ site.brand_name }}</p>
+</footer>
+{% endblock %}

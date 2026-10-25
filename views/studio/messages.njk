@@ -1,0 +1,25 @@
+{% extends "layouts/studio.njk" %}
+{% block title %}Messages · Studio{% endblock %}
+
+{% block main %}
+<header class="s-head"><div><p class="note">Conversations</p><h1>Messages</h1></div></header>
+<nav class="s-tabs" aria-label="Message views">
+  <a href="/studio/messages" {% if not unreadOnly %}aria-current="true"{% endif %}>All</a>
+  <a href="/studio/messages?view=unread" {% if unreadOnly %}aria-current="true"{% endif %}>Unread</a>
+</nav>
+<div class="s-body">
+  {% if threads.length %}
+  <ul class="ledger" role="list">
+    {% for t in threads %}
+    <li><a class="ledger__row {% if t.studio_unread %}is-unread{% endif %}" href="/studio/messages/{{ t.id }}">
+      <span class="ledger__main">
+        <span class="ledger__title">{{ t.customer }} <span class="note">· {{ t.subject_label }}</span></span>
+        <span class="small muted ledger__excerpt">{{ t.last_body | truncate(120) }}</span>
+      </span>
+      <span class="note">{% if t.studio_unread %}<span class="dot">{{ t.studio_unread }}</span> {% endif %}{{ t.last_message_at | stamp }}</span>
+    </a></li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="empty">No messages{{ ' unread' if unreadOnly }}.</p>{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Categories · Studio{% endblock %}
+
+{% block main %}
+<header class="s-head"><div><p class="note">Organise</p><h1>Categories</h1></div></header>
+<div class="s-body" style="max-width: 56rem">
+  <p class="small muted">Categories group pieces on the website (for example evening gowns, pageant formalwear). Each belongs to a section — women’s gowns, menswear, costumes — which the homepage and collection use to group them. Only categories with published gowns appear as filters.</p>
+  <form method="post" action="/studio/categories" class="inline-form boxed" style="margin: 1.2rem 0 2rem">
+    {{ m.csrf() }}
+    <div class="field"><label for="nc-name">New category</label><input class="input" id="nc-name" name="name" required maxlength="60"></div>
+    <div class="field"><label for="nc-section">Section</label><select class="select" id="nc-section" name="section">{% for k, l in SECTIONS %}<option value="{{ k }}">{{ l }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="nc-order">Order</label><input class="input" id="nc-order" name="sort_order" type="number" min="0" max="999" value="{{ categories.length + 1 }}" style="width: 6rem"></div>
+    <button class="btn btn--small" type="submit">Add</button>
+  </form>
+  {% if categories.length %}
+  <ul class="calendar-list">
+    {% for c in categories %}
+    <li style="grid-template-columns: 1fr auto">
+      <form method="post" action="/studio/categories/{{ c.id }}" class="inline-form boxed">
+        {{ m.csrf() }}
+        <label class="visually-hidden" for="c-{{ c.id }}">Name</label><input class="input" id="c-{{ c.id }}" name="name" value="{{ c.name }}" required maxlength="60">
+        <label class="visually-hidden" for="cs-{{ c.id }}">Section</label><select class="select" id="cs-{{ c.id }}" name="section">{% for k, l in SECTIONS %}<option value="{{ k }}" {% if c.section == k %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+        <label class="visually-hidden" for="co-{{ c.id }}">Order</label><input class="input" id="co-{{ c.id }}" name="sort_order" type="number" min="0" max="999" value="{{ c.sort_order }}" style="width: 5rem">
+        <button class="link-plain small" type="submit">Save</button>
+        <span class="note">{{ c.gown_count }} gown{% if c.gown_count != 1 %}s{% endif %}</span>
+      </form>
+      <form method="post" action="/studio/categories/{{ c.id }}" data-confirm="Remove “{{ c.name }}”? Its gowns stay, uncategorised.">
+        {{ m.csrf() }}<input type="hidden" name="action" value="delete"><button class="link-plain small" type="submit">Remove</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="empty">No categories yet.</p>{% endif %}
+</div>
+{% endblock %}

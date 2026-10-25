@@ -1,0 +1,14 @@
+{% extends "layouts/account.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}{{ thread.subject_label }} · Messages{% endblock %}
+
+{% block content %}
+<header class="acct__head">
+  <p class="note"><a href="/account/messages">Messages</a></p>
+  <h1 class="h2">{{ thread.subject_label }}</h1>
+  {% if subjectLink %}<p><a class="link" href="{{ subjectLink }}">Open {{ 'the gown' if thread.subject_type == 'gown' else 'the request' }} <span class="arrow">→</span></a></p>{% endif %}
+</header>
+<div style="max-width: 46rem">
+  {{ m.conversation({ messages: messages }, '/account/messages/' + thread.id, user, csrfToken) }}
+</div>
+{% endblock %}

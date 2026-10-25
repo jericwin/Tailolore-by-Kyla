@@ -1,0 +1,25 @@
+{% extends "layouts/account.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Wishlist · {{ site.brand_name }}{% endblock %}
+
+{% block content %}
+<header class="acct__head"><p class="note">Wishlist</p><h1 class="h1">Saved <em>gowns</em></h1></header>
+{% if gowns.length %}
+<ul class="wish-grid" role="list">
+  {% for g in gowns %}
+  <li>
+    <a class="look__link" href="/gowns/{{ g.slug }}">
+      {{ m.plate(g.main, sizes='(min-width: 900px) 22vw, 45vw', alt=g.name) }}
+      <span class="look__cap"><span class="note">{{ loop.index | pad }}</span><span class="look__name">{{ g.name }}</span><span class="eyebrow">{{ m.services(g) }}</span></span>
+    </a>
+    <form method="post" action="/wishlist/{{ g.id }}">
+      {{ m.csrf() }}<input type="hidden" name="next" value="/account/wishlist">
+      <button class="link-plain small" type="submit">Remove</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="acct__empty"><p class="lede">Nothing saved yet.</p><p class="muted">Use “Save” on any gown to keep it here.</p><a class="link" href="/collection">The collection <span class="arrow">→</span></a></div>
+{% endif %}
+{% endblock %}

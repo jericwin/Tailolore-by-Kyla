@@ -1,0 +1,22 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}Notifications · Studio{% endblock %}
+
+{% block main %}
+<header class="s-head">
+  <div><p class="note">Studio</p><h1>Notifications</h1></div>
+  {% if unread %}<form method="post" action="/studio/notifications/read">{{ m.csrf() }}<button class="btn btn--ghost btn--small" type="submit">Mark all as read</button></form>{% endif %}
+</header>
+<div class="s-body" style="max-width: 56rem">
+  {% if notifications.length %}
+  <ul class="notices notices--full" role="list">
+    {% for n in notifications %}
+    <li class="{% if not n.read_at %}is-unread{% endif %}"><a href="/studio/notifications/{{ n.id }}">
+      <span><span class="notices__title">{{ n.title }}</span>{% if n.body %}<span class="small muted">{{ n.body }}</span>{% endif %}</span>
+      <span class="note">{{ n.created_at | stamp }}</span>
+    </a></li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="empty">No notifications yet.</p>{% endif %}
+</div>
+{% endblock %}

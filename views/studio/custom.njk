@@ -1,0 +1,117 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}{{ custom.reference }} · Studio{% endblock %}
+
+{% block main %}
+<header class="s-head">
+  <div><p class="note"><a href="/studio/custom">Custom gowns</a> / {{ custom.reference }}</p><h1>{{ custom.event_type }}</h1></div>
+  <div class="s-head__actions">{{ m.statusMark(status.CUSTOM, custom.status) }}</div>
+</header>
+
+<div class="s-body">
+  <div class="s-grid s-grid--main">
+    <div>
+      <section class="s-section">
+        <h2>The request</h2>
+        <dl class="facts">
+          <div><dt>Customer</dt><dd>{{ custom.contact_name }}<br><span class="small"><a href="mailto:{{ custom.contact_email }}">{{ custom.contact_email }}</a>{% if custom.contact_phone %} · <a href="tel:{{ custom.contact_phone | replace(' ', '') }}">{{ custom.contact_phone }}</a>{% endif %} · prefers {{ { messages: 'website messages', phone: 'phone', email: 'email', facebook: 'Messenger' }[custom.preferred_contact] or 'website messages' }}</span><br><a class="small" href="/studio/customers/{{ custom.customer_id }}">Customer history</a></dd></div>
+          {% if custom.based_on_name %}<div><dt>Based on</dt><dd><a href="/studio/gowns/{{ custom.based_on_gown_id }}">{{ custom.based_on_name }}</a></dd></div>{% endif %}
+          <div><dt>Event</dt><dd>{{ custom.event_date | date if custom.event_date else 'Not given' }}</dd></div>
+          {% if custom.silhouette %}<div><dt>Design</dt><dd>{{ custom.silhouette }}</dd></div>{% endif %}
+          {% if custom.colors %}<div><dt>Colours</dt><dd>{{ custom.colors }}</dd></div>{% endif %}
+          {% if custom.fabrics %}<div><dt>Fabrics</dt><dd>{{ custom.fabrics }}</dd></div>{% endif %}
+          <div><dt>Budget</dt><dd>{% if custom.budget_min or custom.budget_max %}{{ custom.budget_min | money }}{% if custom.budget_min and custom.budget_max %} – {% endif %}{{ custom.budget_max | money }}{% else %}Not given{% endif %}</dd></div>
+          {% for k, v in measurements %}<div><dt>{{ k | capitalize }}</dt><dd>{{ v }}</dd></div>{% endfor %}
+          {% if custom.instructions %}<div><dt>Notes</dt><dd>{{ custom.instructions | nl2p }}</dd></div>{% endif %}
+          <div><dt>Received</dt><dd>{{ custom.created_at | stamp }}</dd></div>
+        </dl>
+        {% if images.length %}
+        <p class="note">Inspiration</p>
+        <div class="insp">{% for i in images %}<a href="/media/p/{{ i.id }}/full" target="_blank" rel="noopener"><img src="/media/p/{{ i.id }}/thumb" alt="Inspiration image {{ loop.index }}" loading="lazy"></a>{% endfor %}</div>
+        {% endif %}
+      </section>
+
+      <section class="s-section" id="quotation">
+        <h2>Quotations</h2>
+        {% for q in quotations %}
+        <article class="quote-card {% if q.status == 'sent' %}is-open{% endif %}" style="margin-bottom: 1rem">
+          <div class="quote-card__head">
+            <span class="price__main">{{ q.amount | money }}</span>
+            <span class="status status--{{ 'action' if q.status == 'sent' else ('ok' if q.status == 'accepted' else 'closed') }}">{{ { sent: 'Waiting for customer', accepted: 'Accepted', declined: 'Declined', superseded: 'Superseded', withdrawn: 'Withdrawn' }[q.status] }}</span>
+          </div>
+          <div class="quote-card__body small">{{ q.details | nl2p }}</div>
+          <dl class="facts facts--compact">
+            {% if q.downpayment %}<div><dt>Downpayment</dt><dd>{{ q.downpayment | money }}</dd></div>{% endif %}
+            {% if q.proposed_deadline %}<div><dt>Ready by</dt><dd>{{ q.proposed_deadline | date }}</dd></div>{% endif %}
+            {% if q.valid_until %}<div><dt>Valid until</dt><dd>{{ q.valid_until | date }}</dd></div>{% endif %}
+            <div><dt>Sent</dt><dd>{{ q.created_at | stamp }}</dd></div>
+            {% if q.customer_response %}<div><dt>Reply</dt><dd>{{ q.customer_response }}</dd></div>{% endif %}
+          </dl>
+          {% if q.status == 'sent' %}
+          <form method="post" action="/studio/custom/{{ custom.id }}/quotations/{{ q.id }}/withdraw" data-confirm="Withdraw this quotation?">{{ m.csrf() }}<button class="link-plain small" type="submit">Withdraw</button></form>
+          {% endif %}
+        </article>
+        {% else %}
+        <p class="empty" style="padding-top: 0">No quotation sent yet.</p>
+        {% endfor %}
+
+        {% if custom.status in ['pending_review', 'quotation_sent'] %}
+        <form method="post" action="/studio/custom/{{ custom.id }}/quotations" class="s-card s-form boxed">
+          {{ m.csrf() }}
+          <h3>{{ 'Send a revised quotation' if custom.status == 'quotation_sent' else 'Send a quotation' }}</h3>
+          <div class="row">
+            {{ m.box('amount', 'Total (₱)', {}, {}, attrs='required inputmode="decimal"') }}
+            {{ m.box('downpayment', 'Downpayment (₱)', {}, {}, hint='Optional', attrs='inputmode="decimal"') }}
+          </div>
+          {{ m.box('details', 'What it includes', {}, {}, type='textarea', hint='Design, fabrics, fittings, alterations, timing — what the customer is agreeing to.', attrs='rows="5" required maxlength="4000"') }}
+          <div class="row">
+            {{ m.box('proposed_deadline', 'Ready by', {}, {}, type='date') }}
+            {{ m.box('valid_until', 'Quotation valid until', {}, {}, type='date') }}
+          </div>
+          <button class="btn btn--small" type="submit">Send quotation</button>
+          {% if custom.status == 'quotation_sent' %}<p class="small muted">The open quotation will be marked as superseded.</p>{% endif %}
+        </form>
+        {% endif %}
+      </section>
+
+      <section class="s-section" id="brief">
+        <h2>Agreed brief</h2>
+        <form method="post" action="/studio/custom/{{ custom.id }}/brief" class="s-form boxed">
+          {{ m.csrf() }}
+          {{ m.box('agreed_measurements', 'Agreed measurements', custom, {}, type='textarea', attrs='rows="4" maxlength="4000"') }}
+          {{ m.box('design_notes', 'Design notes', custom, {}, type='textarea', attrs='rows="5" maxlength="8000"') }}
+          <div class="row">
+            {{ m.box('fitting_date', 'Fitting', custom, {}, type='date') }}
+            {{ m.box('deadline', 'Deadline', custom, {}, type='date') }}
+          </div>
+          {{ m.box('admin_note', 'Private note', custom, {}, type='textarea', hint='Only you can see this.', attrs='rows="2" maxlength="4000"') }}
+          <button class="btn btn--ghost btn--small" type="submit">Save brief</button>
+          <p class="small muted">The customer sees the fitting date and deadline once the request is approved; measurements and notes stay private to the studio.</p>
+        </form>
+      </section>
+
+      {{ m.conversation(thread, '/studio/custom/' + custom.id + '/message', user, csrfToken, 'Write to ' + custom.contact_name) }}
+    </div>
+
+    <aside>
+      {% if next.length %}
+      <div class="s-card">
+        <h2>Status</h2>
+        {% if custom.status == 'awaiting_approval' %}<p class="small">The customer accepted the quotation. Approve once the agreement and any required downpayment are settled.</p>{% endif %}
+        {% if custom.status == 'pending_review' %}<p class="small muted">Send a quotation to move this request forward.</p>{% endif %}
+        <div class="status-actions">
+          {% for to in next %}
+          <form method="post" action="/studio/custom/{{ custom.id }}/status" class="boxed" {% if to == 'cancelled' %}data-confirm="Cancel this request?"{% endif %}>
+            {{ m.csrf() }}<input type="hidden" name="to" value="{{ to }}">
+            {% if to != 'cancelled' %}<textarea class="textarea" name="note" rows="2" maxlength="1000" placeholder="Note to the customer (optional)"></textarea>{% endif %}
+            <button class="{{ 'link-plain small' if to == 'cancelled' else ('btn btn--block' if loop.first else 'btn btn--ghost btn--block') }}" type="submit">{{ { pending_review: 'Back to review', approved: 'Approve — agreement confirmed', in_progress: 'Start work', ready_for_fitting: 'Ready for fitting', completed: 'Mark completed', cancelled: 'Cancel request' }[to] }}</button>
+          </form>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      <div class="s-card"><h2>History</h2>{{ m.timeline(history, status.CUSTOM) }}</div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

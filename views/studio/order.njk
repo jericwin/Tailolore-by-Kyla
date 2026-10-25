@@ -1,0 +1,83 @@
+{% extends "layouts/studio.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}{{ order.reference }} · Studio{% endblock %}
+
+{% block main %}
+<header class="s-head">
+  <div><p class="note"><a href="/studio/orders">Purchases</a> / {{ order.reference }}</p><h1>{{ order.gown_name }}</h1></div>
+  <div class="s-head__actions">{{ m.statusMark(status.ORDER, order.status) }}</div>
+</header>
+
+<div class="s-body">
+  <div class="s-grid s-grid--main">
+    <div>
+      <dl class="facts">
+        <div><dt>Customer</dt><dd>{{ order.customer }}<br><span class="small"><a href="mailto:{{ order.customer_email }}">{{ order.customer_email }}</a>{% if order.customer_phone %} · <a href="tel:{{ order.customer_phone | replace(' ', '') }}">{{ order.customer_phone }}</a>{% endif %}</span><br><a class="small" href="/studio/customers/{{ order.customer_id }}">Customer history</a></dd></div>
+        <div><dt>Price</dt><dd>{{ order.quoted_price | money }} <span class="muted small">(at the time of the inquiry)</span></dd></div>
+        <div><dt>Payment</dt><dd>{{ status.PAYMENT[order.payment_status] }}{% if order.payment_note %} — {{ order.payment_note }}{% endif %}</dd></div>
+        {% if order.size_note %}<div><dt>Size</dt><dd>{{ order.size_note }}</dd></div>{% endif %}
+        <div><dt>Handover</dt><dd>{{ 'Delivery' if order.fulfillment == 'delivery' else 'Pickup' }}{% if order.delivery_address %}<br>{{ order.delivery_address }}{% endif %}</dd></div>
+        <div><dt>Piece</dt><dd>{{ order.unit_label or 'Reserved on confirmation' }}</dd></div>
+        <div><dt>Placed</dt><dd>{{ order.created_at | stamp }}</dd></div>
+      </dl>
+      {% if order.customer_note %}<p class="note">Customer’s note</p><div class="quote">{{ order.customer_note | nl2p }}</div>{% endif %}
+      {{ m.conversation(thread, '/studio/orders/' + order.id + '/message', user, csrfToken, 'Write to ' + order.customer) }}
+    </div>
+
+    <aside>
+      {% if next.length %}
+      <div class="s-card">
+        <h2>Next step</h2>
+        <div class="status-actions">
+          {% for to in next %}{% if to != 'cancelled' %}
+          <form method="post" action="/studio/orders/{{ order.id }}/status" class="boxed">
+            {{ m.csrf() }}<input type="hidden" name="to" value="{{ to }}">
+            {% if to == 'confirmed' and units.length > 1 %}
+            <label class="small" for="unit">Reserve piece</label>
+            <select class="select" id="unit" name="unit_id">{% for u in units %}<option value="{{ u.id }}">{{ u.label }}{% if u.size %} ({{ u.size }}){% endif %}</option>{% endfor %}</select>
+            {% endif %}
+            {% if to == 'confirmed' %}<textarea class="textarea" name="note" rows="2" maxlength="1000" placeholder="Note to the customer (optional)"></textarea>{% endif %}
+            <button class="btn btn--block {% if not loop.first %}btn--ghost{% endif %}" type="submit" {% if to == 'completed' and order.payment_status != 'verified' %}disabled title="Verify payment first"{% endif %}>{{ { confirmed: 'Confirm — gown is available', processing: 'Mark as being prepared', ready: 'Mark as ready', completed: 'Complete order' }[to] }}</button>
+          </form>
+          {% endif %}{% endfor %}
+          {% if 'completed' in next and order.payment_status != 'verified' %}<p class="small muted">Verify the payment below before completing.</p>{% endif %}
+          {% if order.status == 'pending' %}<p class="small muted">Confirming reserves a piece so it can’t be sold or rented to anyone else.</p>{% endif %}
+          {% if 'cancelled' in next %}
+          <form method="post" action="/studio/orders/{{ order.id }}/status" class="boxed" data-confirm="Cancel this order?">
+            {{ m.csrf() }}<input type="hidden" name="to" value="cancelled">
+            <textarea class="textarea" name="note" rows="2" maxlength="1000" placeholder="Reason, shown to the customer"></textarea>
+            <button class="link-plain small" type="submit">Cancel order</button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if order.status != 'pending' %}
+      <div class="s-card">
+        <h2>Payment</h2>
+        <form method="post" action="/studio/orders/{{ order.id }}/payment" class="status-actions boxed">
+          {{ m.csrf() }}
+          <select class="select" name="payment_status" aria-label="Payment status">
+            {% for k, l in PAYMENT %}<option value="{{ k }}" {% if order.payment_status == k %}selected{% endif %}>{{ l }}</option>{% endfor %}
+          </select>
+          <input class="input" name="payment_note" value="{{ order.payment_note }}" maxlength="500" placeholder="Method / reference">
+          <button class="btn btn--ghost btn--small" type="submit">Save</button>
+          <p class="small muted" style="margin: 0">Only mark “verified” once you have received the money yourself.</p>
+        </form>
+      </div>
+      {% endif %}
+
+      <div class="s-card">
+        <h2>Private note</h2>
+        <form method="post" action="/studio/orders/{{ order.id }}/note" class="status-actions boxed">
+          {{ m.csrf() }}
+          <textarea class="textarea" name="admin_note" rows="3" maxlength="4000" placeholder="Only you can see this">{{ order.admin_note }}</textarea>
+          <button class="btn btn--ghost btn--small" type="submit">Save note</button>
+        </form>
+      </div>
+      <div class="s-card"><h2>History</h2>{{ m.timeline(history, status.ORDER) }}</div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

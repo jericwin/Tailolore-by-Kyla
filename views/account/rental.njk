@@ -1,0 +1,54 @@
+{% extends "layouts/account.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}{{ rental.reference }} · {{ site.brand_name }}{% endblock %}
+
+{% block content %}
+<header class="acct__head">
+  <p class="note"><a href="/account/rentals">My rentals</a> / {{ rental.reference }}</p>
+  <h1 class="h1">{{ rental.gown_name }}</h1>
+  <p>{{ m.statusMark(status.RENTAL, rental.status) }}</p>
+  {{ m.progress('rental', rental.status) }}
+  <p class="acct__explain">{{ status.RENTAL[rental.status].note }}</p>
+  {% if rental.decision_reason and rental.status in ['rejected', 'cancelled'] %}<p class="small">Note: {{ rental.decision_reason }}</p>{% endif %}
+</header>
+
+<div class="record">
+  <div class="record__main">
+    <dl class="facts">
+      <div><dt>Event</dt><dd>{{ rental.event_date | date }}</dd></div>
+      <div><dt>Pickup</dt><dd>{{ rental.pickup_date | date }}</dd></div>
+      <div><dt>Return</dt><dd>{{ rental.return_date | date }}</dd></div>
+      {% if rental.size_note %}<div><dt>Size</dt><dd>{{ rental.size_note }}</dd></div>{% endif %}
+      <div><dt>Rental</dt><dd>{{ rental.quoted_price | money }}{% if rental.period_days %} <span class="muted">· up to {{ rental.period_days }} days</span>{% endif %}</dd></div>
+      {% if rental.quoted_deposit %}<div><dt>Deposit</dt><dd>{{ rental.quoted_deposit | money }} <span class="muted">· {{ status.DEPOSIT[rental.deposit_status] }}</span></dd></div>{% endif %}
+      {% if rental.return_condition %}<div><dt>Returned</dt><dd>{{ rental.return_condition | replace('_', ' ') | capitalize }}{% if rental.damage_notes %} — {{ rental.damage_notes }}{% endif %}</dd></div>{% endif %}
+    </dl>
+    {% if rental.customer_note %}<p class="note">Your note</p><div class="quote">{{ rental.customer_note | nl2p }}</div>{% endif %}
+    {% if rental.status == 'awaiting_deposit' %}
+    <div class="panel">
+      <p class="note note--thread">Deposit due{% if rental.quoted_deposit %} — {{ rental.quoted_deposit | money }}{% endif %}</p>
+      {% if site.payment_instructions %}{{ site.payment_instructions | nl2p }}{% else %}<p>Kyla will send deposit payment details in the messages below.</p>{% endif %}
+      <p class="small muted">Your dates are held for you. The booking is confirmed once Kyla has received the deposit — payment is never taken on this website.</p>
+    </div>
+    {% endif %}
+    {% if rental.terms_snapshot %}
+    <details class="ask"><summary class="link">Terms you agreed to <span class="arrow">+</span></summary><div class="terms" style="margin-top: .8rem">{{ rental.terms_snapshot | nl2p }}</div></details>
+    {% endif %}
+
+    {{ m.conversation(thread, '/account/rentals/' + rental.id + '/message', user, csrfToken) }}
+  </div>
+
+  <aside class="record__side">
+    <a class="link" href="/gowns/{{ rental.gown_slug }}">View the gown <span class="arrow">→</span></a>
+    <h2 class="eyebrow" style="margin-top: 2rem">History</h2>
+    {{ m.timeline(history, status.RENTAL) }}
+    {% if cancellable %}
+    <form method="post" action="/account/rentals/{{ rental.id }}/cancel" data-confirm="Cancel this rental{% if rental.status != 'requested' %} — your dates will be released{% endif %}?" style="margin-top: 2rem">
+      {{ m.csrf() }}<button class="btn btn--danger btn--small" type="submit">Cancel {{ 'request' if rental.status == 'requested' else 'rental' }}</button>
+    </form>
+    {% elif rental.status in ['awaiting_deposit', 'confirmed'] %}
+    <p class="small muted" style="margin-top: 2rem">To change or cancel this booking, please message Kyla{% if cancelDays %} — online cancellation closes {{ cancelDays }} days before pickup{% endif %}.</p>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ site.brand_name }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ site.brand_name }} — gowns to rent, to buy and made to order{% if site.location %}, {{ site.location }}{% endif %}.{% endblock %}">
+  <meta name="theme-color" content="#161311">
+  <meta property="og:title" content="{% block ogTitle %}{{ site.brand_name }}{% endblock %}">
+  <meta property="og:site_name" content="{{ site.brand_name }}">
+  <meta property="og:image" content="{% block ogImage %}/static/img/brand/og-card.jpg{% endblock %}">
+  <meta property="og:type" content="website">
+  {% if area == 'studio' or area == 'account' %}<meta name="robots" content="noindex, nofollow">{% endif %}
+  <link rel="icon" href="/static/img/brand/favicon-64.png" type="image/png">
+  <link rel="apple-touch-icon" href="/static/img/brand/apple-touch-icon.png">
+  <link rel="preload" href="/static/fonts/bodoni-moda.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fonts/hanken-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/css/base.css?v={{ assetVersion }}">
+  {% block styles %}{% endblock %}
+  <script src="/static/js/site.js?v={{ assetVersion }}" defer></script>
+  {% block scripts %}{% endblock %}
+</head>
+<body class="{% block bodyClass %}{% endblock %}" data-csrf="{{ csrfToken }}">
+  <a class="skip-link" href="#main">Skip to content</a>
+  {% block body %}{% endblock %}
+</body>
+</html>

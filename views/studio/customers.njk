@@ -1,0 +1,33 @@
+{% extends "layouts/studio.njk" %}
+{% block title %}Customers · Studio{% endblock %}
+
+{% block main %}
+<header class="s-head"><div><p class="note">People</p><h1>Customers</h1></div></header>
+<div class="s-body">
+  <form class="s-search boxed" method="get" action="/studio/customers">
+    <label class="visually-hidden" for="q">Search</label>
+    <input class="input" id="q" name="q" value="{{ q }}" placeholder="Name, email or phone">
+    <button class="btn btn--ghost btn--small" type="submit">Search</button>
+  </form>
+  {% if customers.length %}
+  <div class="table-wrap">
+    <table class="table table--stack">
+      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th class="num">Rentals</th><th class="num">Purchases</th><th class="num">Custom</th><th>Joined</th></tr></thead>
+      <tbody>
+        {% for c in customers %}
+        <tr>
+          <td><a class="table__main" href="/studio/customers/{{ c.id }}">{{ c.full_name }}</a>{% if c.disabled %} <span class="status status--closed">Disabled</span>{% endif %}{% if c.password_help_at %} <span class="status status--action">Needs sign-in help</span>{% endif %}</td>
+          <td data-label="Email" class="small">{{ c.email }}</td>
+          <td data-label="Phone" class="small">{{ c.phone or '—' }}</td>
+          <td data-label="Rentals" class="num">{{ c.rentals }}</td>
+          <td data-label="Purchases" class="num">{{ c.orders }}</td>
+          <td data-label="Custom" class="num">{{ c.customs }}</td>
+          <td data-label="Joined" class="note">{{ c.created_at | stamp }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="empty">No customers{{ ' match' if q }}.</p>{% endif %}
+</div>
+{% endblock %}

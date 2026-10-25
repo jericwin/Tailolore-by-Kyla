@@ -1,0 +1,49 @@
+{% extends "layouts/account.njk" %}
+{% import "partials/macros.njk" as m with context %}
+{% block title %}{{ order.reference }} · {{ site.brand_name }}{% endblock %}
+
+{% block content %}
+<header class="acct__head">
+  <p class="note"><a href="/account/orders">My purchases</a> / {{ order.reference }}</p>
+  <h1 class="h1">{{ order.gown_name }}</h1>
+  <p>{{ m.statusMark(status.ORDER, order.status) }}</p>
+  {{ m.progress('order', order.status) }}
+  <p class="acct__explain">{{ status.ORDER[order.status].note }}</p>
+</header>
+
+<div class="record">
+  <div class="record__main">
+    <dl class="facts">
+      <div><dt>Price</dt><dd>{{ order.quoted_price | money }}</dd></div>
+      <div><dt>Payment</dt><dd>{{ status.PAYMENT[order.payment_status] }}{% if order.payment_note and order.payment_status != 'unpaid' %} <span class="muted">· {{ order.payment_note }}</span>{% endif %}</dd></div>
+      {% if order.size_note %}<div><dt>Size</dt><dd>{{ order.size_note }}</dd></div>{% endif %}
+      <div><dt>Handover</dt><dd>{{ 'Delivery' if order.fulfillment == 'delivery' else 'Pickup from the studio' }}{% if order.delivery_address %}<br><span class="muted">{{ order.delivery_address }}</span>{% endif %}</dd></div>
+      <div><dt>Placed</dt><dd>{{ order.created_at | stamp }}</dd></div>
+    </dl>
+    {% if order.status == 'confirmed' and order.payment_status != 'verified' %}
+    <div class="panel">
+      <p class="note note--thread">Payment</p>
+      {% if site.payment_instructions %}{{ site.payment_instructions | nl2p }}{% else %}<p>Kyla will send payment details in the messages below.</p>{% endif %}
+      <p class="small muted">Payment is never taken on this website. Kyla marks it as verified once she has received it.</p>
+    </div>
+    {% endif %}
+    {% if order.customer_note %}<p class="note">Your note</p><div class="quote">{{ order.customer_note | nl2p }}</div>{% endif %}
+    {% if order.terms_snapshot %}
+    <details class="ask"><summary class="link">Terms you agreed to <span class="arrow">+</span></summary><div class="terms" style="margin-top: .8rem">{{ order.terms_snapshot | nl2p }}</div></details>
+    {% endif %}
+    {{ m.conversation(thread, '/account/orders/' + order.id + '/message', user, csrfToken) }}
+  </div>
+  <aside class="record__side">
+    <a class="link" href="/gowns/{{ order.gown_slug }}">View the gown <span class="arrow">→</span></a>
+    <h2 class="eyebrow" style="margin-top: 2rem">History</h2>
+    {{ m.timeline(history, status.ORDER) }}
+    {% if cancellable %}
+    <form method="post" action="/account/orders/{{ order.id }}/cancel" data-confirm="Cancel this order?" style="margin-top: 2rem">
+      {{ m.csrf() }}<button class="btn btn--danger btn--small" type="submit">Cancel order</button>
+    </form>
+    {% elif order.status not in ['completed', 'cancelled'] %}
+    <p class="small muted" style="margin-top: 2rem">To change or cancel, please message Kyla.</p>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}
