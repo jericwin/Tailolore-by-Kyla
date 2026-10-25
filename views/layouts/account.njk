@@ -4,37 +4,37 @@
 
 {% block main %}
 {% set c = acctCounts or {} %}
-<div class="acct">
-  <nav class="acct__nav" aria-label="Your account">
-    <div class="acct__me">
+{#- The account bar: full width under the header, pinned while the page scrolls. -#}
+<nav class="acct-bar" aria-label="Your account">
+  <div class="acct-bar__inner">
+    <a class="acct__me" href="/account/settings" title="Account settings">
       <span class="acct__initial" aria-hidden="true">{{ user.fullName | first | upper }}</span>
-      <span class="acct__who">
-        <span class="acct__hello">{{ user.fullName }}</span>
-        <span class="acct__email">{{ user.email }}</span>
-      </span>
-    </div>
-    <ul data-acct-nav>
+      <span class="acct__hello">{{ user.fullName }}</span>
+    </a>
+    <ul class="acct__tabs" data-acct-nav>
       {% for key, label, href, count in [
         ['overview', 'Overview', '/account', null],
-        ['rentals', 'My rentals', '/account/rentals', c.rentals],
-        ['orders', 'My purchases', '/account/orders', c.orders],
+        ['rentals', 'Rentals', '/account/rentals', c.rentals],
+        ['orders', 'Purchases', '/account/orders', c.orders],
         ['custom', 'Custom orders', '/account/custom', c.custom],
         ['messages', 'Messages', '/account/messages', c.messages],
         ['wishlist', 'Wishlist', '/account/wishlist', c.wishlist],
         ['notifications', 'Notifications', '/account/notifications', unread],
-        ['settings', 'Account settings', '/account/settings', null]
+        ['settings', 'Settings', '/account/settings', null]
       ] %}
       <li><a href="{{ href }}" {% if section == key %}aria-current="page"{% endif %}>
-        <span class="acct__label">{{ label }}</span>
+        {{ label }}
         {% if count %}<span class="acct__count {% if key in ['messages', 'notifications'] %}is-new{% endif %}">{{ count }}<span class="visually-hidden"> {{ { messages: 'unread', notifications: 'unread', wishlist: 'saved' }[key] or 'in progress' }}</span></span>{% endif %}
       </a></li>
       {% endfor %}
     </ul>
-    <div class="acct__foot">
+    <div class="acct__end">
       <a class="acct__shop" href="/collection">Browse gowns <span aria-hidden="true">→</span></a>
       <form class="acct__signout" method="post" action="/logout"><input type="hidden" name="_csrf" value="{{ csrfToken }}"><button type="submit">Sign out</button></form>
     </div>
-  </nav>
+  </div>
+</nav>
+<div class="acct">
   <div class="acct__body">
     {% block content %}{% endblock %}
   </div>

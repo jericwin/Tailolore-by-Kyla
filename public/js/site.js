@@ -185,7 +185,8 @@
     var nav = document.querySelector('[data-acct-nav]');
     if (!nav) return;
     var current = nav.querySelector('[aria-current]');
-    if (current && nav.scrollWidth > nav.clientWidth) {
+    // Scroll only if the current page's tab would otherwise be hidden.
+    if (current && (current.offsetLeft + current.offsetWidth > nav.clientWidth)) {
       nav.scrollLeft = Math.max(0, current.offsetLeft - (nav.clientWidth - current.offsetWidth) / 2);
     }
     function edges() {
